@@ -18,3 +18,7 @@
 app.py : main page for annotating data    
 make_db.py: init db for first work    
 admin.py: analysis user task statistics.
+
+
+
+guide docs: https://docs.google.com/presentation/d/1I-AIdn1O6rjtsY6pKV4JC05hN6CWwS8tJXWzXh6S3IY/edit#slide=id.p
