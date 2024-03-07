@@ -34,12 +34,12 @@ def make_user_index_db(user_index_db_path):
 
 def check_db():
     db = bdb.DB()
-    db.open("./data/user_index.db", None, bdb.DB_HASH, bdb.DB_CREATE)
+    db.open(f"/home/ai04/workspace/gradio_labeling/data/user_index.db", None, bdb.DB_HASH, bdb.DB_CREATE)
     print(db[b'test'])
 
 if __name__ == '__main__':
-    db_path = "./data/test.db"
+    db_path = "/home/ai04/workspace/gradio_labeling/data/test.db"
     json_path = '/data3/aihub/food_label_test/file_list.json'
-    user_index_db_path = "./data/user_index.db"
+    user_index_db_path = "/home/ai04/workspace/gradio_labeling/data/user_index.db"
     make_dummy_db(db_path, json_path)
     make_user_index_db(user_index_db_path)
