@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from PIL import Image
 from ultralytics import YOLO
 from glob import glob
 from tqdm import tqdm
@@ -24,17 +25,17 @@ for food_name in tqdm(os.listdir(image_dir), desc="Processing food categories"):
         continue
     files = [os.path.join(food_path, filename) for filename in os.listdir(food_path)]
     for file in tqdm(files, desc = f'crop {food_name}'):
-        result = model(file)
+        result = model(file, verbose=False)
         bbox_list = result[0].boxes.xyxy.tolist()
         for i, bbox_xyxy in enumerate(bbox_list):
             if len(bbox_xyxy) == 0:
                 continue
             file_name = os.path.basename(file).split('.')[0]
             output_path = os.path.join(output_dir, food_name, f'{file_name}_{i}.jpg')
-            #FIXME
-            # must add bbox crop func
-            
-            # result.save(filename = output_path)
+            with Image.open(file) as img:
+                cropped_img = img.crop(bbox_xyxy)
+                cropped_img.convert('RGB').save(output_path)
+
             #FIXME after analysis ratio
             # width = bbox_xyxy[X2] - bbox_xyxy[X1]
             # height = bbox_xyxy[Y2] - bbox_xyxy[Y1]
