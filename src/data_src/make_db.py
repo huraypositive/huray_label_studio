@@ -24,12 +24,9 @@ def make_dummy_db(db_path, json_path):
 def make_user_index_db(user_index_db_path):
     db = bdb.DB()
     db.open(user_index_db_path, None, bdb.DB_HASH, bdb.DB_CREATE)
-    db[b'user1'] = b'0'
-    db[b'user2'] = b'0'
-    db[b'user3'] = b'0'
-    db[b'test'] = b'0'
-    db[b'test2'] = b'0'
-    db[b'test3'] = b'0'
+    db[b'hyunjoo'] = b'0'
+    db[b'jin'] = b'0'
+    db[b'kyuhong'] = b'0'
     db.close()
 
 def check_db():
@@ -38,8 +35,10 @@ def check_db():
     print(db[b'test'])
 
 if __name__ == '__main__':
-    db_path = "/home/ai04/workspace/gradio_labeling/data/test.db"
-    json_path = '/data3/aihub/food_label_test/file_list.json'
-    user_index_db_path = "/home/ai04/workspace/gradio_labeling/data/user_index.db"
-    make_dummy_db(db_path, json_path)
+    user_list = ['hyunjoo', 'jin', 'kyuhong']
+    db_path_list = [f"/home/ai04/workspace/huray_label_studio/data/{user}.db" for user in user_list]
+    json_path = '/home/ai04/workspace/huray_label_studio/data/file_list.json'
+    user_index_db_path = "/home/ai04/workspace/huray_label_studio/data/user_index.db"
+    for db_path in db_path_list:
+        make_dummy_db(db_path, json_path)
     make_user_index_db(user_index_db_path)
