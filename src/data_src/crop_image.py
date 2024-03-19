@@ -50,7 +50,7 @@ def get_crop(model_path, model_config, analysis_output_path, err_output_path, im
                     df_item_list.append([file, output_path, food_name, bbox_xyxy])
             except:
                 err_list.append(file)
-        stop_index += 1
+        i += 1
         if i == stop_index:
             break
 
@@ -68,6 +68,6 @@ if __name__ == '__main__':
     analysis_output_path = '/home/ai04/workspace/huray_label_studio/data/output/analysis_data.csv'
     err_output_path = '/home/ai04/workspace/huray_label_studio/data/output/err_image_list.csv'
     image_dir = '/data3/crawl_data'
-    output_dir = '/data3/crop_crawl_data'
-    stop_index = 4
+    output_dir = '/data3/crop_data'
+    stop_index = 1000000
     get_crop(model_path, model_config, analysis_output_path, err_output_path, image_dir, output_dir, stop_index)
