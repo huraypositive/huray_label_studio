@@ -3,9 +3,10 @@ import gradio as gr
 import os
 import pickle
 from PIL import Image as PILIMAGE
+from PIL import ImageOps
 
-DBPATH = './data/'
-CFGHEIGHT = 600
+DBPATH = '/home/ai04/workspace/huray_label_studio/data'
+
 
 def get_db_connection(db_path):
     db = bdb.DB()
@@ -62,7 +63,6 @@ def filtering_worked_item(user_dropdown, index, retrieved_data_dict, increase = 
 def put_anno_data_to_db(user_name, index, anno, item_length):
     db_path = os.path.join(DBPATH, f"{user_name}.db")
     index_db_path = os.path.join(DBPATH, "user_index.db")
-
     db = get_db_connection(db_path)
     index_db = get_index_db_conncection(index_db_path)
     retrieved_data_dict = get_image_data(user_name, index)
@@ -78,20 +78,26 @@ def put_anno_data_to_db(user_name, index, anno, item_length):
     index_db[user_name.encode()] = str(index).encode()
     index_db.sync()
 
+
     db.close()
     index_db.close()
 
     return index
 
 def display_image(image_path):
-    #FIXME ratio resize doesn't work!!
+    CFGSIZE = 500
     img = PILIMAGE.open(image_path)
-    # orign_width, orign_height = img.size
-    # ratio = CFGHEIGHT / orign_height
-    # resize_width = int(orign_width * ratio)
-    new_img = img.resize((500, 500), PILIMAGE.Resampling.LANCZOS)
-
-    return new_img
+    resized_image = ImageOps.contain(img, (CFGSIZE,CFGSIZE))
+    width, height = resized_image.size
+    padded_image = PILIMAGE.new("RGB", (CFGSIZE,CFGSIZE), (255,255,255))
+    padded_image.paste(resized_image, ((CFGSIZE - width) // 2, (CFGSIZE - height) // 2))
+    
+    # original_width, original_height = img.size
+    # aspect_ratio = original_width / original_height
+    # new_width = int(CFGHEIGHT * aspect_ratio)
+    # new_img = img.resize((new_width, CFGHEIGHT), PILIMAGE.Resampling.LANCZOS)
+    # new_img = img.resize((500, 500), PILIMAGE.Resampling.LANCZOS)
+    return padded_image
 
 def start_func(user_dropdown, work_check):
     if not user_dropdown:
@@ -163,10 +169,10 @@ function shortcuts(e) {
     if (e.key == "t") {
         document.getElementById("anno_true_btn").click();
     }
-    if (e.key == "s") {
+    if (e.key == "f") {
         document.getElementById("anno_false_btn").click();
     }
-    if (e.key == "f") {
+    if (e.key == "s") {
         document.getElementById("anno_skip_btn").click();
     }
 
@@ -184,6 +190,7 @@ with gr.Blocks(head = shortcut_js, theme = gr.themes.Soft()) as demo:
     user_dropdown = gr.State()
     work_check = gr.State()
     item_length = gr.State()
+    
     with gr.Row():
         with gr.Column(scale=10):
             with gr.Row():
@@ -196,7 +203,7 @@ with gr.Blocks(head = shortcut_js, theme = gr.themes.Soft()) as demo:
         with gr.Column(scale=2):
             gr.Markdown("""# Huray Label Studio""")
             with gr.Row():
-                user_dropdown = gr.Dropdown(["test", "test2", "test3"], label = "user")
+                user_dropdown = gr.Dropdown(["hyunjoo", "jin", "kyuhong"], label = "user")
                 work_check = gr.Checkbox(label="미작업 라벨만 보기")
             with gr.Row():
                 start_button = gr.Button('start', variant="primary")
@@ -217,12 +224,12 @@ with gr.Blocks(head = shortcut_js, theme = gr.themes.Soft()) as demo:
     move_text = gr.Textbox(value = 'move', visible =False, interactive = False, max_lines = 1)
     
 
-    start_button.click(start_func, inputs = [user_dropdown, work_check], outputs = [image_output, class_text, anno_text, index_text, item_length])
+    start_button.click(start_func, inputs = [user_dropdown, work_check], outputs = [image_output,class_text, anno_text, index_text, item_length])
     true_button.click(anno_func, inputs = [user_dropdown, true_anno, index_text, work_check, item_length], outputs = [image_output, class_text, anno_text, index_text])
-    false_button.click(anno_func, inputs = [user_dropdown, false_anno, index_text, work_check, item_length], outputs = [image_output, class_text, anno_text, index_text])
-    skip_button.click(anno_func, inputs = [user_dropdown, skip_anno, index_text, work_check, item_length], outputs = [image_output, class_text, anno_text, index_text])
-    prev_button.click(move_func, inputs = [user_dropdown, prev_text, index_text, work_check, item_length], outputs=[image_output, class_text, anno_text, index_text])
-    next_button.click(move_func, inputs = [user_dropdown, next_text, index_text, work_check, item_length], outputs=[image_output, class_text, anno_text, index_text])
+    false_button.click(anno_func, inputs = [user_dropdown, false_anno, index_text, work_check, item_length], outputs = [image_output,class_text, anno_text, index_text])
+    skip_button.click(anno_func, inputs = [user_dropdown, skip_anno, index_text, work_check, item_length], outputs = [image_output,class_text, anno_text, index_text])
+    prev_button.click(move_func, inputs = [user_dropdown, prev_text, index_text, work_check, item_length], outputs=[image_output,class_text, anno_text, index_text])
+    next_button.click(move_func, inputs = [user_dropdown, next_text, index_text, work_check, item_length], outputs=[image_output,class_text, anno_text, index_text])
     index_button.click(move_func, inputs = [user_dropdown, move_text, index_text, work_check, item_length], outputs=[image_output, class_text, anno_text, index_text])
 
 demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0")
