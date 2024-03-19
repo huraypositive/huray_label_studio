@@ -5,10 +5,10 @@ import pickle
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 
-DBPATH = './data/'
+DBPATH = '/home/ai04/workspace/huray_label_studio/data/'
 CFGHEIGHT = 600
 
-font_path = "/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf"  
+font_path = "/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf"
 font_prop = font_manager.FontProperties(fname=font_path)
 rc('font', family=font_prop.get_name())
 
@@ -32,7 +32,7 @@ def analysis_all(user_dropdown):
     ax.legend(legend_labels, title="Annotations", loc="best")
     ax.set_title(f'{user_dropdown} Annotation Distribution')
 
-    return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)"
+    return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total
 
 def cate_annotation_chart(user_dropdown, class_name):
     data_list = []
@@ -55,7 +55,7 @@ def cate_annotation_chart(user_dropdown, class_name):
         fig, ax = plt.subplots()
         ax.pie(annotation_counts.values(), labels=annotation_counts.keys(), autopct='%1.1f%%', startangle=90, wedgeprops=dict(width=0.3))
         ax.set_title(f'Annotations for class "{class_name}"')
-        return fig, f"{count_df.get('True', '0')} ({count_df.get('True', 0) / sum_count*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / sum_count*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / sum_count*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / sum_count*100:.2f}%)"
+        return fig, f"{count_df.get('True', '0')} ({count_df.get('True', 0) / sum_count*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / sum_count*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / sum_count*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / sum_count*100:.2f}%)", sum_count
     else:
         gr.Warning('클래스명을 확인해주세요')
 
@@ -75,9 +75,8 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
             with gr.Row():
                 plot_output = gr.Plot()
         with gr.Column(scale=2):
-            
             with gr.Row():
-                user_dropdown = gr.Dropdown(["test", "test2", "test3"], label = "user")
+                user_dropdown = gr.Dropdown(["hyunjoo", "jin", "kyuhong"], label = "user")
             with gr.Row():
                 start_button = gr.Button('전체 조회', variant="primary")
                 class_text = gr.Textbox(label = 'class', max_lines = 1)
@@ -87,8 +86,9 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
 
                 unknown_count_text = gr.Textbox(label = 'unknown count', interactive = False, max_lines = 1)
                 none_count_text = gr.Textbox(label = 'none count', interactive = False, max_lines = 1)
+                toal_count_text = gr.Textbox(label = 'total count', interactive = False, max_lines = 1)
 
-    start_button.click(analysis_all, inputs = [user_dropdown], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text])
-    index_button.click(cate_annotation_chart, inputs = [user_dropdown, class_text], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text])
+    start_button.click(analysis_all, inputs = [user_dropdown], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text])
+    index_button.click(cate_annotation_chart, inputs = [user_dropdown, class_text], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text])
 
 demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0")
