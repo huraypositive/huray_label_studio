@@ -3,7 +3,8 @@ import gradio as gr
 import os
 import pickle
 from PIL import Image as PILIMAGE
-import time
+from PIL import ImageOps
+
 DBPATH = '/home/ai04/workspace/huray_label_studio/data'
 
 
@@ -84,14 +85,19 @@ def put_anno_data_to_db(user_name, index, anno, item_length):
     return index
 
 def display_image(image_path):
-    CFGHEIGHT = 500
+    CFGSIZE = 500
     img = PILIMAGE.open(image_path)
+    resized_image = ImageOps.contain(img, (CFGSIZE,CFGSIZE))
+    width, height = resized_image.size
+    padded_image = PILIMAGE.new("RGB", (CFGSIZE,CFGSIZE), (255,255,255))
+    padded_image.paste(resized_image, ((CFGSIZE - width) // 2, (CFGSIZE - height) // 2))
+    
     # original_width, original_height = img.size
     # aspect_ratio = original_width / original_height
     # new_width = int(CFGHEIGHT * aspect_ratio)
     # new_img = img.resize((new_width, CFGHEIGHT), PILIMAGE.Resampling.LANCZOS)
-    new_img = img.resize((500, 500), PILIMAGE.Resampling.LANCZOS)
-    return new_img
+    # new_img = img.resize((500, 500), PILIMAGE.Resampling.LANCZOS)
+    return padded_image
 
 def start_func(user_dropdown, work_check):
     if not user_dropdown:
