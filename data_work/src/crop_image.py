@@ -10,6 +10,16 @@ X2 = 2
 Y2 = 3
 
 def get_model(model_path, model_config):
+    """
+    initialize and config model
+
+    Args:
+    - model_path: path ot model weights
+    - model_config: YOLO model config check Ultralytics github for more detail
+
+    Returns:
+    - model: initialized YOLO model object
+    """
     model = YOLO(model_path)
     model.conf = model_config['confidence']
     model.iou = model_config['iou']
@@ -20,11 +30,32 @@ def get_model(model_path, model_config):
 
     return model
 
-def write_csv(data, output_path):
+def write_csv(data:list, output_path:str):
+    """
+    write dataframe to csv
+    
+    Args:
+    - data: data list
+    - output_path: output path to save analysis data list
+    """
     df = pd.DataFrame(data)
     df.to_csv(output_path)
 
-def get_crop(model_path, model_config, analysis_output_path, err_output_path, image_dir, output_dir):
+def get_crop(model_path:str, model_config:dict, analysis_output_path:str, err_output_path:str, image_dir:str, output_dir:str):
+    """
+    parallelize processing workload using multple gpu
+    uses as many processes as gpu
+    
+    Args:
+    - model_path: path ot model weights
+    - model_config: YOLO model config check Ultralytics github for more detail
+    - analysis_output_path: analysis data output path
+    - err_output_path: save path for error image path list while processing YOLO
+    - image_dir: base image path
+    - output_dir: path to result will be save
+    
+    """
+
     model = get_model(model_path, model_config)
     df_item_list = []
     err_list = []
