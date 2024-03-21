@@ -16,14 +16,15 @@ def make_db(db_path, json_path):
 
     with open(json_path, 'r', encoding = 'utf-8-sig') as f:
         json_data = json.load(f)
-
-    for index, key in enumerate(tqdm(json_data.keys())):
+    index = 0
+    for key in tqdm(json_data.keys()):
         for file_path in json_data[key]:
             new_path = file_path.replace("/data/aihub", "/data3/aihub") #if use in v100 del this line
             db_dict = {"file_path": new_path, "class_name": key, "annotation": None}
             dict_bytes = pickle.dumps(db_dict)
             db[str(index).encode()] = dict_bytes
-
+            index += 1
+    print(index)
     db.close()
 
 def make_user_index_db(user_index_db_path, user_list):
@@ -43,7 +44,7 @@ def make_user_index_db(user_index_db_path, user_list):
 if __name__ == '__main__':
     user_list = ['hyunjoo', 'jin', 'jeonga']
     db_path_list = [f"/home/ai04/workspace/huray_label_studio/data/{user}.db" for user in user_list]
-    json_path = '/home/ai04/workspace/huray_label_studio/data/file_list.json'
+    json_path = '/home/ai04/workspace/huray_label_studio/data/food_images.json'
     user_index_db_path = "/home/ai04/workspace/huray_label_studio/data/user_index.db"
     for db_path in db_path_list:
         make_db(db_path, json_path)
