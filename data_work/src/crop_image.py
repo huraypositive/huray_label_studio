@@ -4,11 +4,6 @@ from PIL import Image
 from ultralytics import YOLO
 from tqdm import tqdm
 
-X1 = 0
-Y1 = 1
-X2 = 2
-Y2 = 3
-
 def get_model(model_path, model_config):
     """
     initialize and config model
@@ -33,7 +28,7 @@ def get_model(model_path, model_config):
 def write_csv(data:list, output_path:str):
     """
     write dataframe to csv
-    
+
     Args:
     - data: data list
     - output_path: output path to save analysis data list
