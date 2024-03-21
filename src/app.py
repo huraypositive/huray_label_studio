@@ -115,7 +115,7 @@ def start_func(user_dropdown, work_check):
 
     return display_image(image_file_path), class_name, anno_text, index, int(item_length) - 1
 
-def anno_func(user_dropdown, anno, index, work_check, item_length):
+def anno_func(user_dropdown, anno, index, work_check, item_length, prev_class_text):
     if not user_dropdown:
         raise gr.Error("사용자를 선택해 주세요.")
     index = put_anno_data_to_db(user_dropdown, index, anno, item_length)
@@ -125,6 +125,8 @@ def anno_func(user_dropdown, anno, index, work_check, item_length):
     image_file_path = retrieved_data_dict['file_path']
     class_name = retrieved_data_dict['class_name']
     anno_text = retrieved_data_dict.get('annotation', '')
+    if prev_class_text != anno_text:
+        gr.Error("class가 변경되었습니다! 확인해주세요")
 
     return display_image(image_file_path), class_name, anno_text, index
 
@@ -181,7 +183,8 @@ document.addEventListener('keyup', shortcuts, false);
 </script>
 """
 
-with gr.Blocks(head = shortcut_js, theme = gr.themes.Soft()) as demo:
+
+with gr.Blocks(head = shortcut_js, css = " .toast-wrap.svelte-pu0yf1 {top: 3%; left: 40%;}", theme = gr.themes.Soft()) as demo:
     db = gr.State()
     index_text = gr.State()
     index_db = gr.State()
@@ -225,9 +228,9 @@ with gr.Blocks(head = shortcut_js, theme = gr.themes.Soft()) as demo:
     
 
     start_button.click(start_func, inputs = [user_dropdown, work_check], outputs = [image_output,class_text, anno_text, index_text, item_length])
-    true_button.click(anno_func, inputs = [user_dropdown, true_anno, index_text, work_check, item_length], outputs = [image_output, class_text, anno_text, index_text])
-    false_button.click(anno_func, inputs = [user_dropdown, false_anno, index_text, work_check, item_length], outputs = [image_output,class_text, anno_text, index_text])
-    skip_button.click(anno_func, inputs = [user_dropdown, skip_anno, index_text, work_check, item_length], outputs = [image_output,class_text, anno_text, index_text])
+    true_button.click(anno_func, inputs = [user_dropdown, true_anno, index_text, work_check, item_length, class_text], outputs = [image_output, class_text, anno_text, index_text])
+    false_button.click(anno_func, inputs = [user_dropdown, false_anno, index_text, work_check, item_length, class_text], outputs = [image_output,class_text, anno_text, index_text])
+    skip_button.click(anno_func, inputs = [user_dropdown, skip_anno, index_text, work_check, item_length, class_text], outputs = [image_output,class_text, anno_text, index_text])
     prev_button.click(move_func, inputs = [user_dropdown, prev_text, index_text, work_check, item_length], outputs=[image_output,class_text, anno_text, index_text])
     next_button.click(move_func, inputs = [user_dropdown, next_text, index_text, work_check, item_length], outputs=[image_output,class_text, anno_text, index_text])
     index_button.click(move_func, inputs = [user_dropdown, move_text, index_text, work_check, item_length], outputs=[image_output, class_text, anno_text, index_text])
