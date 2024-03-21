@@ -3,7 +3,14 @@ import json
 import pickle
 from tqdm import tqdm
 
-def make_dummy_db(db_path, json_path):
+def make_db(db_path, json_path):
+    """
+    make berkley DB for annotations tools using image json
+
+    Args:
+    - db_path: save database path
+    - json_path: load json path
+    """
     db = bdb.DB()
     db.open(db_path, None, bdb.DB_HASH, bdb.DB_CREATE)
 
@@ -20,24 +27,24 @@ def make_dummy_db(db_path, json_path):
     db.close()
 
 def make_user_index_db(user_index_db_path, user_list):
+    """
+    make user index DB for annotations tools
+
+    Args:
+    - user_index_db_path: save index database path
+    - user_list: user list 
+    """
     db = bdb.DB()
     db.open(user_index_db_path, None, bdb.DB_HASH, bdb.DB_CREATE)
     for user in user_list:
         db[user.encode()] = b'0'
-        db[user.encode()] = b'0'
-        db[user.encode()] = b'0'
     db.close()
 
-def check_db(user_index_db_path, user_name):
-    db = bdb.DB()
-    db.open(user_index_db_path, None, bdb.DB_HASH, bdb.DB_CREATE)
-    print(db[user_name.encode()])
-
 if __name__ == '__main__':
-    user_list = ['hyunjoo', 'jin', 'kyuhong']
+    user_list = ['hyunjoo', 'jin', 'jeonga']
     db_path_list = [f"/home/ai04/workspace/huray_label_studio/data/{user}.db" for user in user_list]
     json_path = '/home/ai04/workspace/huray_label_studio/data/file_list.json'
     user_index_db_path = "/home/ai04/workspace/huray_label_studio/data/user_index.db"
     for db_path in db_path_list:
-        make_dummy_db(db_path, json_path)
+        make_db(db_path, json_path)
     make_user_index_db(user_index_db_path, user_list)
