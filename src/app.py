@@ -7,7 +7,6 @@ from PIL import ImageOps
 
 DBPATH = '/home/ai04/workspace/huray_label_studio/data'
 
-
 def get_db_connection(db_path):
     db = bdb.DB()
     db.open(db_path, None, bdb.DB_HASH, bdb.DB_CREATE)
@@ -91,12 +90,7 @@ def display_image(image_path):
     width, height = resized_image.size
     padded_image = PILIMAGE.new("RGB", (CFGSIZE,CFGSIZE), (255,255,255))
     padded_image.paste(resized_image, ((CFGSIZE - width) // 2, (CFGSIZE - height) // 2))
-    
-    # original_width, original_height = img.size
-    # aspect_ratio = original_width / original_height
-    # new_width = int(CFGHEIGHT * aspect_ratio)
-    # new_img = img.resize((new_width, CFGHEIGHT), PILIMAGE.Resampling.LANCZOS)
-    # new_img = img.resize((500, 500), PILIMAGE.Resampling.LANCZOS)
+
     return padded_image
 
 def start_func(user_dropdown, work_check):
@@ -125,8 +119,8 @@ def anno_func(user_dropdown, anno, index, work_check, item_length, prev_class_te
     image_file_path = retrieved_data_dict['file_path']
     class_name = retrieved_data_dict['class_name']
     anno_text = retrieved_data_dict.get('annotation', '')
-    if prev_class_text != anno_text:
-        gr.Error("class가 변경되었습니다! 확인해주세요")
+    if prev_class_text != class_name:
+        gr.Warning("class가 변경되었습니다! 확인해주세요")
 
     return display_image(image_file_path), class_name, anno_text, index
 
