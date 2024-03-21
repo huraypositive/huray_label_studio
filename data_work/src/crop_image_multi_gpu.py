@@ -44,22 +44,22 @@ def process_images(args:tuple):
         output_path_dir = os.path.join(output_dir, food_name)
         if not os.path.exists(output_path_dir):
             os.makedirs(output_path_dir)
-        # try:
-        result = model(file, verbose=False)
-        bbox_list = result[0].boxes.xyxy.tolist()
-        for i, bbox_xyxy in enumerate(bbox_list):
-            if len(bbox_xyxy) == 0:
-                continue
-            file_name = os.path.basename(file).split('.')[0]
-            output_path = os.path.join(output_dir, food_name, f'{file_name}_{i}.jpg')
-            if os.path.exists(output_path):
-                continue
-            with Image.open(file) as img:
-                cropped_img = img.crop((bbox_xyxy[0], bbox_xyxy[1], bbox_xyxy[2], bbox_xyxy[3]))
-                cropped_img.convert('RGB').save(output_path)
-            df_item_list.append([file, output_path, food_name, list(bbox_xyxy)])
-        # except Exception as e:
-        #     err_list.append(file)
+        try:
+            result = model(file, verbose=False)
+            bbox_list = result[0].boxes.xyxy.tolist()
+            for i, bbox_xyxy in enumerate(bbox_list):
+                if len(bbox_xyxy) == 0:
+                    continue
+                file_name = os.path.basename(file).split('.')[0]
+                output_path = os.path.join(output_dir, food_name, f'{file_name}_{i}.jpg')
+                if os.path.exists(output_path):
+                    continue
+                with Image.open(file) as img:
+                    cropped_img = img.crop(bbox_xyxy)
+                    cropped_img.convert('RGB').save(output_path)
+                df_item_list.append([file, output_path, food_name, list(bbox_xyxy)])
+        except Exception as e:
+            err_list.append(file)
 
     df = pd.DataFrame(df_item_list, columns=['Original File', 'Cropped File', 'Category', 'BoundingBox'])
     df.to_csv(f'{output_dir}/analysis_data_gpu{model_config["gpu_id"]}.csv', index=False)
