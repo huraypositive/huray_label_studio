@@ -1,2 +1,5 @@
 bsddb3==6.2.9
 gradio==4.19.1
+ultralytics==8.1.19
+numpy==1.26.3
+pandas==2.2.0
