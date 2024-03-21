@@ -24,7 +24,7 @@ def write_csv(data, output_path):
     df = pd.DataFrame(data)
     df.to_csv(output_path)
 
-def get_crop(model_path, model_config, analysis_output_path, err_output_path, image_dir, output_dir, stop_index):
+def get_crop(model_path, model_config, analysis_output_path, err_output_path, image_dir, output_dir):
     model = get_model(model_path, model_config)
     df_item_list = []
     err_list = []
@@ -52,9 +52,7 @@ def get_crop(model_path, model_config, analysis_output_path, err_output_path, im
                     df_item_list.append([file, output_path, food_name, bbox_xyxy])
             except:
                 err_list.append(file)
-        i += 1
-        if i == stop_index:
-            break
+
 
     write_csv(df_item_list, analysis_output_path)
     write_csv(err_list, err_output_path)
@@ -71,5 +69,5 @@ if __name__ == '__main__':
     err_output_path = '/home/ai04/workspace/huray_label_studio/data/output/err_image_list.csv'
     image_dir = '/data3/crawl_data'
     output_dir = '/data3/crop_data'
-    stop_index = 1000000
-    get_crop(model_path, model_config, analysis_output_path, err_output_path, image_dir, output_dir, stop_index)
+
+    get_crop(model_path, model_config, analysis_output_path, err_output_path, image_dir, output_dir)
