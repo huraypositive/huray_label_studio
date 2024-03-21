@@ -200,7 +200,7 @@ with gr.Blocks(head = shortcut_js, css = " .toast-wrap.svelte-pu0yf1 {top: 3%; l
         with gr.Column(scale=2):
             gr.Markdown("""# Huray Label Studio""")
             with gr.Row():
-                user_dropdown = gr.Dropdown(["hyunjoo", "jin", "kyuhong"], label = "user")
+                user_dropdown = gr.Dropdown(["hyunjoo", "jin", "jeonga"], label = "user")
                 work_check = gr.Checkbox(label="미작업 라벨만 보기")
             with gr.Row():
                 start_button = gr.Button('start', variant="primary")
