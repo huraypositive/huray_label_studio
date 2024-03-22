@@ -25,7 +25,6 @@ def make_db(db_path, json_path):
             dict_bytes = pickle.dumps(db_dict)
             db[str(index).encode()] = dict_bytes
             index += 1
-    print(index)
     db.close()
 
 def make_user_index_db(user_index_db_path, user_list):
