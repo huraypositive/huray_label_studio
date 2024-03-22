@@ -1,3 +1,4 @@
+import argparse
 import os
 import pandas as pd
 from PIL import Image
@@ -96,7 +97,16 @@ def split_processing(model_path:str, model_config:dict, image_dir:str, output_di
         p.join()
 
 if __name__ == '__main__':
-    model_path = '/home/ai04/workspace/food_detection/food_detection_v1/yolov8l_120_0005_auto/weights/best.pt'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model_path', type = str, default = '/home/ai04/workspace/food_detection/food_detection_v1/yolov8l_120_0005_auto/weights/best.pt', required = True)
+    parser.add_argument('--image_dir', type = str, default = '/data3/crawl_data', required = True)
+    parser.add_argument('--output_dir', type = str, default = '/data3/crop_data_test', required = True)
+    parser.add_argument('--num_gpus', type = int, required = True)
+    args = parser.parse_args()
+    model_path = args.model_path
+    image_dir = args.image_dir
+    output_dir = args.output_dir
+    num_gpus = args.num_gpus
     model_config = {
         "confidence": 0.1,
         "iou": 0.7,
@@ -105,9 +115,5 @@ if __name__ == '__main__':
         "tta": True,
         "agnostic_nms": False,
     }
-    image_dir = '/data3/crawl_data'
-    output_dir = '/data3/crop_data_test'
-    num_gpus = 2 
-
     split_processing(model_path, model_config, image_dir, output_dir, num_gpus)
    

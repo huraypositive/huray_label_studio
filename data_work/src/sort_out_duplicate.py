@@ -1,3 +1,4 @@
+import argparse
 import os
 import json
 from PIL import Image
@@ -92,8 +93,13 @@ def save_to_json(data:dict, output_file:str):
         json.dump(data, f, indent=4)
 
 if __name__ == '__main__':
-    directory = '/data3/crop_data'  
-    output_file = '/home/ai04/workspace/huray_label_studio/data/food_images.json'
-    num_cores = 32 
-    processed_data = process_images_in_directory(directory, num_cores)
-    save_to_json(processed_data, output_file)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--image_dir', type = str, default = '/data3/crawl_data_test', required = True)
+    parser.add_argument('--output_dir', type = str, default = '/home/ai04/workspace/huray_label_studio/data/food_images.json', required = True)
+    parser.add_argument('--num_cpu', type = int, default = 16, required = True)
+    args = parser.parse_args()
+    image_dir = args.image_dir
+    output_dir = args.output_dir
+    num_cores = args.num_cpu
+    processed_data = process_images_in_directory(image_dir, num_cores)
+    save_to_json(processed_data, output_dir)
