@@ -1,3 +1,4 @@
+import argparse
 import bsddb3.db as bdb
 import json
 import pickle
@@ -42,10 +43,15 @@ def make_user_index_db(user_index_db_path, user_list):
     db.close()
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--json_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/food_images.json', required = True)
+    parser.add_argument('--user_index_db_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/user_index.db', required = True)
+    parser.add_argument('--user_db_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/')
+    args = parser.parse_args()
     user_list = ['hyunjoo', 'jin', 'jeonga']
-    db_path_list = [f"/home/ai04/workspace/huray_label_studio/data/{user}.db" for user in user_list]
-    json_path = '/home/ai04/workspace/huray_label_studio/data/food_images.json'
-    user_index_db_path = "/home/ai04/workspace/huray_label_studio/data/user_index.db"
+    db_path_list = [f'{args.user_db_path}{user}.db' for user in user_list]
+    json_path = args.json_path
+    user_index_db_path = args.user_index_db_path
     for db_path in db_path_list:
         make_db(db_path, json_path)
     make_user_index_db(user_index_db_path, user_list)

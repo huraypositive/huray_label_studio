@@ -96,7 +96,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--image_dir', type = str, default = '/data3/crawl_data_test', required = True)
     parser.add_argument('--output_dir', type = str, default = '/home/ai04/workspace/huray_label_studio/data/food_images.json', required = True)
-    parser.add_argument('--num_cpu', type = int, default = 16, required = True)
+    parser.add_argument('--num_cpu', type = int)
     args = parser.parse_args()
     image_dir = args.image_dir
     output_dir = args.output_dir
