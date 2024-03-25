@@ -33,7 +33,7 @@ def analysis_all(user_dropdown):
     ax.legend(legend_labels, title="Annotations", loc="best")
     ax.set_title(f'{user_dropdown} Annotation Distribution')
 
-    return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total
+    return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total, int(total) - int(count_df.get('Empty', 0))
 
 def cate_annotation_chart(user_dropdown, class_name):
     data_list = []
@@ -56,7 +56,7 @@ def cate_annotation_chart(user_dropdown, class_name):
         fig, ax = plt.subplots()
         ax.pie(annotation_counts.values(), labels=annotation_counts.keys(), autopct='%1.1f%%', startangle=90, wedgeprops=dict(width=0.3))
         ax.set_title(f'Annotations for class "{class_name}"')
-        return fig, f"{count_df.get('True', '0')} ({count_df.get('True', 0) / sum_count*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / sum_count*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / sum_count*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / sum_count*100:.2f}%)", sum_count
+        return fig, f"{count_df.get('True', '0')} ({count_df.get('True', 0) / sum_count*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / sum_count*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / sum_count*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / sum_count*100:.2f}%)", sum_count, int(sum_count) - int(count_df.get('Empty', 0))
     else:
         gr.Warning('클래스명을 확인해주세요')
 
@@ -87,9 +87,10 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
 
                 unknown_count_text = gr.Textbox(label = 'unknown count', interactive = False, max_lines = 1)
                 none_count_text = gr.Textbox(label = 'none count', interactive = False, max_lines = 1)
+                work_count_text = gr.Textbox(label = 'work count', interactive = False, max_lines = 1)
                 toal_count_text = gr.Textbox(label = 'total count', interactive = False, max_lines = 1)
 
-    start_button.click(analysis_all, inputs = [user_dropdown], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text])
-    index_button.click(cate_annotation_chart, inputs = [user_dropdown, class_text], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text])
+    start_button.click(analysis_all, inputs = [user_dropdown], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
+    index_button.click(cate_annotation_chart, inputs = [user_dropdown, class_text], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
 
 demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0")
