@@ -1,11 +1,12 @@
 import bsddb3.db as bdb
 import gradio as gr
 import pandas as pd
+import os
 import pickle
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 
-DBPATH = '/home/ai04/workspace/huray_label_studio/data/'
+DBPATH = '/data3/food_labelingDB'
 CFGHEIGHT = 600
 
 font_path = "/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf"
@@ -16,7 +17,7 @@ rc('font', family=font_prop.get_name())
 def analysis_all(user_dropdown):
     data_list = []
     db = bdb.DB()
-    db_path = f'{DBPATH}{user_dropdown}.db'
+    db_path = os.path.join(DBPATH, f'{user_dropdown}.db')
     db.open(db_path, None, bdb.DB_HASH, bdb.DB_CREATE)
     for key in db.keys():
         data_bytes = db.get(key)
@@ -37,7 +38,7 @@ def analysis_all(user_dropdown):
 def cate_annotation_chart(user_dropdown, class_name):
     data_list = []
     db = bdb.DB()
-    db_path = f'{DBPATH}{user_dropdown}.db'
+    db_path = os.path.join(DBPATH, f'{user_dropdown}.db')
     db.open(db_path, None, bdb.DB_HASH, bdb.DB_CREATE)
     for key in db.keys():
         data_bytes = db.get(key)
@@ -76,7 +77,7 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                 plot_output = gr.Plot()
         with gr.Column(scale=2):
             with gr.Row():
-                user_dropdown = gr.Dropdown(["hyunjoo", "jin", "kyuhong"], label = "user")
+                user_dropdown = gr.Dropdown(["hyunjoo_20240325", "jin_20240325", "jeonga_20240325"], label = "user")
             with gr.Row():
                 start_button = gr.Button('전체 조회', variant="primary")
                 class_text = gr.Textbox(label = 'class', max_lines = 1)
