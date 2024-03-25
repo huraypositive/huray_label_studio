@@ -12,7 +12,9 @@
     sudo apt-get install fonts-nanum*    
     sudo fc-cache -fv    
 
-3. create python env and install requirements    
+3. create python env and install requirements
+    
+4. gradio app.py
 
 
 app.py : main page for annotating data    
