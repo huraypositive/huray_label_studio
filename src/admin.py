@@ -82,7 +82,7 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                 start_button = gr.Button('전체 조회', variant="primary")
                 class_text = gr.Textbox(label = 'class', max_lines = 1)
                 index_button = gr.Button('클래스 조회')
-                true_count_text = gr.Textbox(label = 'ture count', interactive = False, max_lines = 1)
+                true_count_text = gr.Textbox(label = 'true count', interactive = False, max_lines = 1)
                 false_count_text = gr.Textbox(label = 'false count', interactive = False, max_lines = 1)
 
                 unknown_count_text = gr.Textbox(label = 'unknown count', interactive = False, max_lines = 1)
