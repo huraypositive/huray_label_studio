@@ -77,7 +77,7 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                 plot_output = gr.Plot()
         with gr.Column(scale=2):
             with gr.Row():
-                user_dropdown = gr.Dropdown(["hyunjoo_20240325", "jin_20240325", "jeonga_20240325"], label = "user")
+                user_dropdown = gr.Dropdown(["hyunjoo_20240326", "jin_20240326", "jeonga_20240326"], label = "user")
             with gr.Row():
                 start_button = gr.Button('전체 조회', variant="primary")
                 class_text = gr.Textbox(label = 'class', max_lines = 1)
@@ -89,7 +89,7 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                 none_count_text = gr.Textbox(label = 'none count', interactive = False, max_lines = 1)
                 work_count_text = gr.Textbox(label = 'work count', interactive = False, max_lines = 1)
                 toal_count_text = gr.Textbox(label = 'total count', interactive = False, max_lines = 1)
-
+  
     start_button.click(analysis_all, inputs = [user_dropdown], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     index_button.click(cate_annotation_chart, inputs = [user_dropdown, class_text], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
 
