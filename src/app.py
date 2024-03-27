@@ -20,7 +20,7 @@ def get_index_db_conncection(index_db_path):
     return index_db
 
 def get_last_index(user_name):
-    index_db_path = os.path.join(DBPATH, "user_index.db")
+    index_db_path = os.path.join(DBPATH, "user_index_20240326.db")
     index_db = get_index_db_conncection(index_db_path)
     index = int(index_db.get(user_name.encode()).decode())
     index_db.close()
@@ -61,7 +61,7 @@ def filtering_worked_item(user_dropdown, index, retrieved_data_dict, increase = 
     
 def put_anno_data_to_db(user_name, index, anno, item_length):
     db_path = os.path.join(DBPATH, f"{user_name}.db")
-    index_db_path = os.path.join(DBPATH, "user_index.db")
+    index_db_path = os.path.join(DBPATH, "user_index_20240326.db")
     db = get_db_connection(db_path)
     index_db = get_index_db_conncection(index_db_path)
     retrieved_data_dict = get_image_data(user_name, index)
@@ -76,7 +76,6 @@ def put_anno_data_to_db(user_name, index, anno, item_length):
         gr.Warning("마지막 데이터입니다.")
     index_db[user_name.encode()] = str(index).encode()
     index_db.sync()
-
 
     db.close()
     index_db.close()
@@ -171,12 +170,20 @@ function shortcuts(e) {
     if (e.key == "s") {
         document.getElementById("anno_skip_btn").click();
     }
+    if (e.key == "Enter") {
+        document.getElementById("index_move_btn").click();
+    }
+    if (e.key == "ArrowLeft") {
+        document.getElementById("index_prev_btn").click();
+    }
+    if (e.key == "ArrowRight") {
+        document.getElementById("index_next_btn").click();
+    }
 
 }
 document.addEventListener('keyup', shortcuts, false);
 </script>
 """
-
 
 with gr.Blocks(head = shortcut_js, css = " .toast-wrap.svelte-pu0yf1 {top: 3%; left: 40%;}", theme = gr.themes.Soft()) as demo:
     db = gr.State()
@@ -200,17 +207,17 @@ with gr.Blocks(head = shortcut_js, css = " .toast-wrap.svelte-pu0yf1 {top: 3%; l
         with gr.Column(scale=2):
             gr.Markdown("""# Huray Label Studio""")
             with gr.Row():
-                user_dropdown = gr.Dropdown(["hyunjoo_20240325", "jin_20240325", "jeonga_20240325"], label = "user")
+                user_dropdown = gr.Dropdown(["hyunjoo_20240326", "jin_20240326", "jeonga_20240326"], label = "user")
                 work_check = gr.Checkbox(label="미작업 라벨만 보기")
             with gr.Row():
                 start_button = gr.Button('start', variant="primary")
                 index_text = gr.Textbox(label = 'index', max_lines = 1)
                 item_length = gr.Textbox(label = 'max index', interactive = False, max_lines = 1)
-                index_button = gr.Button('move')
+                index_move_button = gr.Button('move', elem_id="index_move_btn")
                 class_text = gr.Textbox(label = 'class name',  interactive = False, max_lines = 1)
                 anno_text = gr.Textbox(label = 'annotation', interactive = False, max_lines = 1)
-                prev_button = gr.Button('prev')
-                next_button = gr.Button('next')
+                prev_button = gr.Button('prev', elem_id="index_prev_btn")
+                next_button = gr.Button('next', elem_id="index_next_btn")
 
     true_anno = gr.Textbox(value = 'True', visible = False, interactive = False, max_lines = 1)
     false_anno = gr.Textbox(value = 'False', visible = False, interactive = False, max_lines = 1)
@@ -227,6 +234,6 @@ with gr.Blocks(head = shortcut_js, css = " .toast-wrap.svelte-pu0yf1 {top: 3%; l
     skip_button.click(anno_func, inputs = [user_dropdown, skip_anno, index_text, work_check, item_length, class_text], outputs = [image_output,class_text, anno_text, index_text])
     prev_button.click(move_func, inputs = [user_dropdown, prev_text, index_text, work_check, item_length], outputs=[image_output,class_text, anno_text, index_text])
     next_button.click(move_func, inputs = [user_dropdown, next_text, index_text, work_check, item_length], outputs=[image_output,class_text, anno_text, index_text])
-    index_button.click(move_func, inputs = [user_dropdown, move_text, index_text, work_check, item_length], outputs=[image_output, class_text, anno_text, index_text])
+    index_move_button.click(move_func, inputs = [user_dropdown, move_text, index_text, work_check, item_length], outputs=[image_output, class_text, anno_text, index_text])
 
 demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0")
