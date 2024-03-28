@@ -43,9 +43,10 @@ def get_image_data(user_name, index, start = False):
     return retrieved_data_dict
 
 def index_changer(index, increase = True):
+    filtered_index = ''.join([char for char in index if char.isdigit()])
     if increase:
-        return int(index) + 1
-    return int(index) -1
+        return int(filtered_index) + 1
+    return int(filtered_index) -1
 
 def filtering_worked_item(user_dropdown, index, retrieved_data_dict, increase = True):
     anno_text = retrieved_data_dict.get('annotation', '')
@@ -109,9 +110,10 @@ def start_func(user_dropdown, work_check):
     return display_image(image_file_path), class_name, anno_text, index, int(item_length) - 1
 
 def anno_func(user_dropdown, anno, index, work_check, item_length, prev_class_text):
+    filtered_index = ''.join([char for char in index if char.isdigit()])
     if not user_dropdown:
         raise gr.Error("사용자를 선택해 주세요.")
-    index = put_anno_data_to_db(user_dropdown, index, anno, item_length)
+    index = put_anno_data_to_db(user_dropdown, filtered_index, anno, item_length)
     retrieved_data_dict = get_image_data(user_dropdown, index)
     if work_check:
         index, retrieved_data_dict = filtering_worked_item(user_dropdown, index, retrieved_data_dict)
