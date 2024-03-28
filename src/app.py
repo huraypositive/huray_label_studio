@@ -236,4 +236,4 @@ with gr.Blocks(head = shortcut_js, css = " .toast-wrap.svelte-pu0yf1 {top: 3%; l
     next_button.click(move_func, inputs = [user_dropdown, next_text, index_text, work_check, item_length], outputs=[image_output,class_text, anno_text, index_text])
     index_move_button.click(move_func, inputs = [user_dropdown, move_text, index_text, work_check, item_length], outputs=[image_output, class_text, anno_text, index_text])
 
-demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0")
+demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0", max_threads = 30, show_api = False, state_session_capacity = 1000)
