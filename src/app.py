@@ -43,7 +43,7 @@ def get_image_data(user_name, index, start = False):
     return retrieved_data_dict
 
 def index_changer(index, increase = True):
-    filtered_index = ''.join([char for char in index if char.isdigit()])
+    filtered_index = ''.join([char for char in str(index) if char.isdigit()])
     if increase:
         return int(filtered_index) + 1
     return int(filtered_index) -1
@@ -97,7 +97,7 @@ def start_func(user_dropdown, work_check):
     if not user_dropdown:
         raise gr.Error("사용자를 선택해 주세요!")
     if work_check:
-        index = '0'
+        index = 0
     else:
         index = get_last_index(user_dropdown)
     retrieved_data_dict, item_length = get_image_data(user_dropdown, index, start = True)
