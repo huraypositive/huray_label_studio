@@ -4,6 +4,7 @@ import os
 import pickle
 from PIL import Image as PILIMAGE
 from PIL import ImageOps
+import datetime
 
 DBPATH = '/data3/food_labelingDB'
 
@@ -20,7 +21,7 @@ def get_index_db_conncection(index_db_path):
     return index_db
 
 def get_last_index(user_name):
-    index_db_path = os.path.join(DBPATH, "user_index_20240326.db")
+    index_db_path = os.path.join(DBPATH, "user_index.db")
     index_db = get_index_db_conncection(index_db_path)
     index = int(index_db.get(user_name.encode()).decode())
     index_db.close()
@@ -62,12 +63,13 @@ def filtering_worked_item(user_dropdown, index, retrieved_data_dict, increase = 
     
 def put_anno_data_to_db(user_name, index, anno, item_length):
     db_path = os.path.join(DBPATH, f"{user_name}.db")
-    index_db_path = os.path.join(DBPATH, "user_index_20240326.db")
+    index_db_path = os.path.join(DBPATH, "user_index.db")
     db = get_db_connection(db_path)
     index_db = get_index_db_conncection(index_db_path)
     retrieved_data_dict = get_image_data(user_name, index)
 
     retrieved_data_dict['annotation'] = anno
+    retrieved_data_dict['datetime'] = datetime.date.today()
     dict_bytes = pickle.dumps(retrieved_data_dict)
     db[str(index).encode()] = dict_bytes
     db.sync()
