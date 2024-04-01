@@ -3,7 +3,7 @@ import bsddb3.db as bdb
 import json
 import pickle
 from tqdm import tqdm
-
+import os
 def make_db(db_path, json_path):
     """
     make berkley DB for annotations tools using image json
@@ -20,8 +20,8 @@ def make_db(db_path, json_path):
     index = 0
     for key in tqdm(json_data.keys()):
         for file_path in json_data[key]:
-            new_path = file_path.replace("/data/aihub", "/data3/aihub") #if use in v100 del this line
-            db_dict = {"file_path": new_path, "class_name": key, "annotation": None}
+            # new_path = file_path.replace("/data/aihub", "/data3/aihub") #if use in v100 del this line
+            db_dict = {"file_path": file_path, "class_name": key, "annotation": None, "datetime": None}
             dict_bytes = pickle.dumps(db_dict)
             db[str(index).encode()] = dict_bytes
             index += 1
@@ -43,14 +43,16 @@ def make_user_index_db(user_index_db_path, user_list):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--json_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/food_images.json', required = True)
+    parser.add_argument('--json_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/db', required = True)
     parser.add_argument('--user_index_db_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/user_index.db', required = True)
     parser.add_argument('--user_db_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/')
     args = parser.parse_args()
-    user_list = ['hyunjoo', 'jin', 'jeonga']
+    user_list = ['hyunjoo', 'jin', 'jeonga','mijeong']
     db_path_list = [f'{args.user_db_path}{user}.db' for user in user_list]
     json_path = args.json_path
     user_index_db_path = args.user_index_db_path
-    for db_path in db_path_list:
-        make_db(db_path, json_path)
+    for user in user_list:
+        user_json_path = os.path.join(json_path, f'{user}.json')
+        db_path = os.path.join(args.user_db_path,f'{user}.db')
+        make_db(db_path, user_json_path)
     make_user_index_db(user_index_db_path, user_list)
