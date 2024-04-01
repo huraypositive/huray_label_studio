@@ -6,7 +6,7 @@ from PIL import Image as PILIMAGE
 from PIL import ImageOps
 import datetime
 
-DBPATH = '/data3/food_labelingDB'
+DBPATH = '/data/huray_label_studio_data'
 
 def get_db_connection(db_path):
     db = bdb.DB()
@@ -67,9 +67,9 @@ def put_anno_data_to_db(user_name, index, anno, item_length):
     db = get_db_connection(db_path)
     index_db = get_index_db_conncection(index_db_path)
     retrieved_data_dict = get_image_data(user_name, index)
-
+    anno_date = datetime.date.today()
     retrieved_data_dict['annotation'] = anno
-    retrieved_data_dict['datetime'] = datetime.date.today()
+    retrieved_data_dict['datetime'] = anno_date.strftime("%Y-%m-%d")
     dict_bytes = pickle.dumps(retrieved_data_dict)
     db[str(index).encode()] = dict_bytes
     db.sync()
@@ -211,7 +211,7 @@ with gr.Blocks(head = shortcut_js, css = " .toast-wrap.svelte-pu0yf1 {top: 3%; l
         with gr.Column(scale=2):
             gr.Markdown("""# Huray Label Studio""")
             with gr.Row():
-                user_dropdown = gr.Dropdown(["hyunjoo_20240326", "jin_20240326", "jeonga_20240326"], label = "user")
+                user_dropdown = gr.Dropdown(["hyunjoo", "jin", "jeonga", "mijeong"], label = "user")
                 work_check = gr.Checkbox(label="미작업 라벨만 보기")
             with gr.Row():
                 start_button = gr.Button('start', variant="primary")
