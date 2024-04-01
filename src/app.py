@@ -6,42 +6,8 @@ from PIL import Image as PILIMAGE
 from PIL import ImageOps
 import datetime
 
-DBPATH = '/data/huray_label_studio_data'
+from utils import get_db_connection, get_index_db_conncection, get_last_index, get_image_data
 
-def get_db_connection(db_path):
-    db = bdb.DB()
-    db.open(db_path, None, bdb.DB_HASH, bdb.DB_CREATE)
-
-    return db
-
-def get_index_db_conncection(index_db_path):
-    index_db = bdb.DB()
-    index_db.open(index_db_path, None, bdb.DB_HASH, bdb.DB_CREATE)
-
-    return index_db
-
-def get_last_index(user_name):
-    index_db_path = os.path.join(DBPATH, "user_index.db")
-    index_db = get_index_db_conncection(index_db_path)
-    index = int(index_db.get(user_name.encode()).decode())
-    index_db.close()
-
-    return index
-
-def get_image_data(user_name, index, start = False):
-    db_path = os.path.join(DBPATH, f"{user_name}.db")
-    db = get_db_connection(db_path)
-    data_bytes = db.get(str(index).encode())
-    retrieved_data_dict = pickle.loads(data_bytes)
-
-    if start:
-        item_length = len(db.keys())    
-        db.close()
-
-        return retrieved_data_dict, item_length
-    db.close()
-
-    return retrieved_data_dict
 
 def index_changer(index, increase = True):
     filtered_index = ''.join([char for char in str(index) if char.isdigit()])
@@ -62,10 +28,8 @@ def filtering_worked_item(user_dropdown, index, retrieved_data_dict, increase = 
     return index, retrieved_data_dict
     
 def put_anno_data_to_db(user_name, index, anno, item_length):
-    db_path = os.path.join(DBPATH, f"{user_name}.db")
-    index_db_path = os.path.join(DBPATH, "user_index.db")
-    db = get_db_connection(db_path)
-    index_db = get_index_db_conncection(index_db_path)
+    db = get_db_connection(user_name)
+    index_db = get_index_db_conncection()
     retrieved_data_dict = get_image_data(user_name, index)
     anno_date = datetime.date.today()
     retrieved_data_dict['annotation'] = anno
