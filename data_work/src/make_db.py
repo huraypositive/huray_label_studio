@@ -20,8 +20,8 @@ def make_db(db_path, json_path):
     index = 0
     for key in tqdm(json_data.keys()):
         for file_path in json_data[key]:
-            # new_path = file_path.replace("/data/aihub", "/data3/aihub") #if use in v100 del this line
-            db_dict = {"file_path": file_path, "class_name": key, "annotation": None, "datetime": None}
+            new_path = file_path.replace("/data3/", "/data/") #if use in v100 del this line
+            db_dict = {"file_path": new_path, "class_name": key, "annotation": None, "datetime": None}
             dict_bytes = pickle.dumps(db_dict)
             db[str(index).encode()] = dict_bytes
             index += 1
@@ -43,11 +43,11 @@ def make_user_index_db(user_index_db_path, user_list):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--json_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/db', required = True)
-    parser.add_argument('--user_index_db_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/user_index.db', required = True)
-    parser.add_argument('--user_db_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/')
+    parser.add_argument('--json_path', type = str, default = '/home/ai04/workspace/huray_label_studio/data/db')
+    parser.add_argument('--user_index_db_path', type = str, default = '/data3/huray_label_studio_data/user_index.db')
+    parser.add_argument('--user_db_path', type = str, default = '/data3/huray_label_studio_data/')
     args = parser.parse_args()
-    user_list = ['hyunjoo', 'jin', 'jeonga','mijeong']
+    user_list = ['test']
     db_path_list = [f'{args.user_db_path}{user}.db' for user in user_list]
     json_path = args.json_path
     user_index_db_path = args.user_index_db_path
