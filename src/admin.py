@@ -41,6 +41,7 @@ def analysis_each_date(user_list, date_time):
     filtered_df = df[df['datetime'] == date]
     filtered_df['annotation'] = filtered_df['annotation'].apply(lambda x: 'Empty' if x == None else x)
     count_df = filtered_df[filtered_df['annotation'].notnull()]['annotation'].value_counts()
+    
     total = sum(count_df.values)
     percentages = [(count / total) * 100 for count in count_df]
     legend_labels = [f'{label}: {percentage:.1f}%' for label, percentage in zip(count_df.index, percentages)]
@@ -48,8 +49,9 @@ def analysis_each_date(user_list, date_time):
     ax.pie(count_df, startangle=140, wedgeprops=dict(width=0.3))
     ax.legend(legend_labels, title="Annotations", loc="best")
     ax.set_title(f'{user_dropdown} Annotation Distribution')
+    choices = list(set(filtered_df['class_name'].to_list()))
 
-    return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total, int(total) - int(count_df.get('Empty', 0))
+    return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total, int(total) - int(count_df.get('Empty', 0)), choices
 
 
 def analysis_all(user_dropdown):
@@ -100,40 +102,42 @@ def cate_annotation_chart(user_dropdown, class_name):
 
 
 with gr.Blocks(theme = gr.themes.Soft()) as demo:
-    db = gr.State()
-    index_text = gr.State()
-    index_db = gr.State()
-    user_name  = gr.State()
+
     image_output = gr.State()
     user_dropdown = gr.State()
-    work_check = gr.State()
-    item_length = gr.State()
-    gr.Markdown("""# Huray Label Analysis""")
-    with gr.Row():
-        with gr.Column(scale=10):
-            with gr.Row():
-                plot_output = gr.Plot()
-        with gr.Column(scale=2):
-            with gr.Row():
-                user_list = gr.CheckboxGroup(["hyunjoo", "jin", "jeonga", "mijeong"], label = "user")
-            with gr.Row():
-                date_time = Calendar(type="datetime", label="Select a date", info="Click the calendar icon to bring up the calendar.")
-            with gr.Row():
-                date_button = gr.Button('날짜별 조회')
-                all_date_button = gr.Button('전체 날짜 조회', variant="primary")
-            with gr.Row():
-                class_text = gr.Textbox(label = 'class', max_lines = 1)
-                index_button = gr.Button('클래스 조회')
-                true_count_text = gr.Textbox(label = 'true count', interactive = False, max_lines = 1)
-                false_count_text = gr.Textbox(label = 'false count', interactive = False, max_lines = 1)
+    test_list = ['asdf','asdf','hfxc']
+    gr.Markdown("""# Huray Label Admin""")
+    with gr.Tab(label = '통계데이터 확인'):
+        with gr.Row():
+            with gr.Column(scale=10):
+                with gr.Row():
+                    plot_output = gr.Plot()
+            with gr.Column(scale=2):
+                with gr.Row():
+                    user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong", "test"], label = "user")
+                with gr.Row():
+                    date_time = Calendar(type="datetime", label="Select a date", info="Click the calendar icon to bring up the calendar.")
+                with gr.Row():
+                    date_button = gr.Button('날짜별 조회')
+                    all_date_button = gr.Button('전체 날짜 조회', variant="primary")
+                with gr.Row():
+                    with gr.Accordion("음식명 확인"):
+                        class_text = gr.Dropdown(label = 'class', multiselect = True, allow_custom_value=True )
+                with gr.Row():
+                    index_button = gr.Button('클래스 조회')
+                    true_count_text = gr.Textbox(label = 'true count', interactive = False, max_lines = 1)
+                    false_count_text = gr.Textbox(label = 'false count', interactive = False, max_lines = 1)
 
-                unknown_count_text = gr.Textbox(label = 'unknown count', interactive = False, max_lines = 1)
-                none_count_text = gr.Textbox(label = 'none count', interactive = False, max_lines = 1)
-                work_count_text = gr.Textbox(label = 'work count', interactive = False, max_lines = 1)
-                toal_count_text = gr.Textbox(label = 'total count', interactive = False, max_lines = 1)
+                    unknown_count_text = gr.Textbox(label = 'unknown count', interactive = False, max_lines = 1)
+                    none_count_text = gr.Textbox(label = 'none count', interactive = False, max_lines = 1)
+                    work_count_text = gr.Textbox(label = 'work count', interactive = False, max_lines = 1)
+                    toal_count_text = gr.Textbox(label = 'total count', interactive = False, max_lines = 1)
+    with gr.Tab(label = '시각화 데이터 확인하기'):
+        gr.Markdown("""# Huray Label test""")
+
   
     all_date_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
-    date_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
+    date_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
     index_button.click(cate_annotation_chart, inputs = [user_dropdown, class_text], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
 
 demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0")
