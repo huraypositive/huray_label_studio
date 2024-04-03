@@ -74,17 +74,13 @@ def analysis_cate_data(user_list, class_name):
 
 
 with gr.Blocks(theme = gr.themes.Soft()) as demo:
-
-    image_output = gr.State()
-    user_dropdown = gr.State()
-    test_list = ['asdf','asdf','hfxc']
     gr.Markdown("""# Huray Label Admin""")
-    with gr.Tab(label = '통계데이터 확인'):
+    with gr.Tab(label = '통계데이터'):
         with gr.Row():
-            with gr.Column(scale=10):
+            with gr.Column(scale = 10):
                 with gr.Row():
-                    plot_output = gr.Plot()
-            with gr.Column(scale=2):
+                    plot_output = gr.Plot(label = 'analysis plot')
+            with gr.Column(scale = 2):
                 with gr.Row():
                     user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong", "test"], label = "user")
                 with gr.Row():
@@ -93,7 +89,7 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                     date_search_button = gr.Button('날짜별 조회')
                     all_date_search_button = gr.Button('전체 날짜 조회', variant="primary")
                 with gr.Row():
-                    with gr.Accordion("음식명 확인", open = False):
+                    with gr.Accordion("음식명", open = False):
                         class_text = gr.Dropdown(label = 'class', multiselect = True, allow_custom_value=True )
                 with gr.Row():
                     class_search_button = gr.Button('클래스 조회')
@@ -104,8 +100,26 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                     none_count_text = gr.Textbox(label = 'none count', interactive = False, max_lines = 1)
                     work_count_text = gr.Textbox(label = 'work count', interactive = False, max_lines = 1)
                     toal_count_text = gr.Textbox(label = 'total count', interactive = False, max_lines = 1)
-    with gr.Tab(label = '시각화 데이터 확인하기'):
-        gr.Markdown("""# Huray Label test""")
+    with gr.Tab(label = '시각화 데이터'):
+        with gr.Row():
+            with gr.Column(scale = 10):
+                with gr.Row():
+                    image_ture_plot_output = gr.Plot(label = 'True')
+                with gr.Row():
+                    image_false_plot_output = gr.Plot()
+                with gr.Row():
+                    image_unknown_plot_output = gr.Plot()
+            with gr.Column(scale = 2):
+                with gr.Row():
+                    image_user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong", "test"], label = "user")
+                with gr.Row():
+                    image_date_time = Calendar(type="datetime", label="Select a date", info="Click the calendar icon to bring up the calendar.")
+                with gr.Row():
+                    with gr.Accordion("음식명", open = False):
+                        image_class_text = gr.Dropdown(label = 'class', multiselect = True, allow_custom_value=True )
+                with gr.Row():
+                    image_make_button = gr.Button('시각화 생성')
+
 
   
     all_date_search_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
