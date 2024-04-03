@@ -59,7 +59,6 @@ def analysis_cate_data(user_list, class_name):
     df['annotation'] = df['annotation'].apply(lambda x: 'Empty' if x == None else x)
     filtered_df = df[df['class_name'].isin(class_name)]
     annotations = filtered_df['annotation'].tolist()
-    # annotations = [item['annotation'] for item in filtered_data if item['annotation']]
     annotation_counts = {annotation: annotations.count(annotation) for annotation in set(annotations)}
     
     if annotation_counts:
