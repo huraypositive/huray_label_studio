@@ -34,6 +34,7 @@ def put_anno_data_to_db(user_name, index, anno, item_length):
     anno_date = datetime.date.today()
     retrieved_data_dict['annotation'] = anno
     retrieved_data_dict['datetime'] = anno_date.strftime("%Y-%m-%d")
+    retrieved_data_dict['index'] = index
     dict_bytes = pickle.dumps(retrieved_data_dict)
     db[str(index).encode()] = dict_bytes
     db.sync()
