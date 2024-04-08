@@ -84,7 +84,7 @@ def change_db_anno(change_index_text_list, change_cate_text_list, anno_checkbox,
     
     if len(change_index_text_list) != 0:
         change_index_text_list = change_index_text_list.split(',')
-        if user_list > 1:
+        if len(user_list) > 1:
             raise gr.Error("한명의 user만 선택해주세요.")
         for change_index in change_index_text_list:
             db = get_db_connection(user_list[0])
