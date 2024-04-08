@@ -1,6 +1,4 @@
-import bsddb3.db as bdb
 import gradio as gr
-import os
 import pickle
 from PIL import Image as PILIMAGE
 from PIL import ImageOps
