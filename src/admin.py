@@ -72,37 +72,46 @@ def analysis_cate_data(user_list, class_name):
         ax.set_title(f'Annotations for class "{class_name}"')
         return fig, f"{count_df.get('True', '0')} ({count_df.get('True', 0) / sum_count*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / sum_count*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / sum_count*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / sum_count*100:.2f}%)", sum_count, int(sum_count) - int(count_df.get('Empty', 0))
     else:
-        gr.Warning('클래스명을 확인해주세요')
+        gr.Warning('클래스명을 확인해주세요.')
 
 def change_db_anno(change_index_text_list, change_cate_text_list, anno_checkbox, user_list):
+    if len(anno_checkbox) == 0:
+        raise gr.Error("annotation을 선택해주세요.")
+    if len(anno_checkbox) > 1:
+        raise gr.Error("annotation을 하나만 선택해주세요.")
     if len(change_index_text_list) != 0 and len(change_cate_text_list) != 0:
-        raise gr.Error("index와 음식명중 하나만 입력해주세요")
+        raise gr.Error("index와 음식명중 하나만 입력해주세요.")
     
     if len(change_index_text_list) != 0:
+        change_index_text_list = change_index_text_list.split(',')
+        if user_list > 1:
+            raise gr.Error("한명의 user만 선택해주세요.")
         for change_index in change_index_text_list:
-            for user in user_list:
-                db = get_db_connection(user)
-                data_bytes = db[str(change_index).encode()]
-                retrieved_data_dict = pickle.loads(data_bytes)
-                retrieved_data_dict['annotation'] = anno_checkbox
-                dict_bytes = pickle.dumps(retrieved_data_dict)
-                db[str(change_index).encode()] = dict_bytes
-                db.close()
+            db = get_db_connection(user_list[0])
+            data_bytes = db[str(change_index).encode()]
+            retrieved_data_dict = pickle.loads(data_bytes)
+            retrieved_data_dict['annotation'] = anno_checkbox[0]
+            dict_bytes = pickle.dumps(retrieved_data_dict)
+            db[str(change_index).encode()] = dict_bytes
+            db.close()
         return 'index 일괄변경이 완료되었습니다.'
     
-    change_cate_text_set = set(change_cate_text_list)
+    change_cate_text_set = set(change_cate_text_list.split(','))
+    change_count = 0
     for user in user_list:
         db = get_db_connection(user)
         for index in range(len(db)):
             data_bytes = db[str(index).encode()]
             retrieved_data_dict = pickle.loads(data_bytes)
             if retrieved_data_dict['class_name'] in change_cate_text_set:
-                retrieved_data_dict['annotation'] = anno_checkbox
+                retrieved_data_dict['annotation'] = anno_checkbox[0]
                 dict_bytes = pickle.dumps(retrieved_data_dict)
-                db[str(change_index).encode()] = dict_bytes
+                db[str(index).encode()] = dict_bytes
+                change_count += 1
         db.close()
-
-        return 'text 일괄변경이 완료되었습니다.'
+    if change_count == 0:
+        raise gr.Error('변경된 데이터가 없습니다. 음식명을 확인해주세요.')
+    return '음식명 일괄변경이 완료되었습니다.'
     
 with gr.Blocks(theme = gr.themes.Soft()) as demo:
     gr.Markdown("""# Huray Label Admin""")
@@ -142,6 +151,8 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                     progress_text = gr.Textbox()
             with gr.Column(scale = 2):
                 with gr.Row():
+                    change_user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong", "test"], label = "user")
+                with gr.Row():
                     anno_checkbox = gr.CheckboxGroup(["True", "False", "unknown"], label = "anno")
                     anno_change_button = gr.Button('일괄 변경', variant="primary")
 
@@ -150,5 +161,5 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
   
     all_date_search_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     date_search_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
-    anno_change_button.click(change_db_anno, inputs = [change_index_text_list, change_cate_text_list, anno_checkbox, user_list], outputs = [progress_text])
+    anno_change_button.click(change_db_anno, inputs = [change_index_text_list, change_cate_text_list, anno_checkbox, change_user_list], outputs = [progress_text])
 demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0")
