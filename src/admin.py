@@ -1,9 +1,7 @@
 import gradio as gr
-import numpy as np
 import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
-from PIL import Image
 from matplotlib import font_manager, rc
 from gradio_calendar import Calendar
 from utils import get_db_connection
