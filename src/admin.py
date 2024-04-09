@@ -57,7 +57,6 @@ def analysis_each_date(user_list, date_time):
 
 def analysis_cate_data(user_list, class_name):
     df = pd.DataFrame(get_db(user_list))
-
     df['annotation'] = df['annotation'].apply(lambda x: 'Empty' if x == None else x)
     filtered_df = df[df['class_name'].isin(class_name)]
     annotations = filtered_df['annotation'].tolist()
@@ -69,7 +68,7 @@ def analysis_cate_data(user_list, class_name):
         sum_count = sum(count_df.values)
         fig, ax = plt.subplots()
         ax.pie(annotation_counts.values(), labels=annotation_counts.keys(), autopct='%1.1f%%', startangle=90, wedgeprops=dict(width=0.3))
-        ax.set_title(f'Annotations for class "{class_name}"')
+        ax.set_title(f'Annotations for class "{" ".join(class_name)}"')
         return fig, f"{count_df.get('True', '0')} ({count_df.get('True', 0) / sum_count*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / sum_count*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / sum_count*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / sum_count*100:.2f}%)", sum_count, int(sum_count) - int(count_df.get('Empty', 0))
     else:
         gr.Warning('클래스명을 확인해주세요.')
@@ -156,10 +155,8 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                     anno_checkbox = gr.CheckboxGroup(["True", "False", "unknown"], label = "anno")
                     anno_change_button = gr.Button('일괄 변경', variant="primary")
 
-
-
-  
     all_date_search_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     date_search_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
+    class_search_button.click(analysis_cate_data, inputs = [user_list, class_text], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     anno_change_button.click(change_db_anno, inputs = [change_index_text_list, change_cate_text_list, anno_checkbox, change_user_list], outputs = [progress_text])
-demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0")
+demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0", server_port = 7861)
