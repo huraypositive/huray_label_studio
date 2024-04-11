@@ -103,14 +103,15 @@ def change_db_anno(change_index_text_list, change_cate_text_list, anno_checkbox,
     if change_count == 0:
         raise gr.Error('변경된 데이터가 없습니다. 음식명을 확인해주세요.')
     return '음식명 일괄변경이 완료되었습니다.'
-    
+  
 def make_csv(user_list):
+    if len(user_list) == 0:
+        raise gr.Error("유저를 선택해주세요.")
     csv_dir_path = '/data/huray_label_studio_data/export_csv'
-    anno_date = datetime.date.today()
-    output_path = os.path.join(csv_dir_path, f'{anno_date.strftime("%Y-%m-%d")}.csv')
+    output_path = os.path.join(csv_dir_path, f'{datetime.date.today()}.csv')
     df = pd.DataFrame(get_db(user_list))
-    filtered_df = df[df['annotation'].notnull()]
-    count_df = filtered_df.groupby(['class_name', 'annotation']).size().unstack(fill_value=0)
+    df['annotation'] = df['annotation'].fillna("None")
+    count_df = df.groupby(['class_name', 'annotation']).size().unstack(fill_value=0)
     count_df.to_csv(output_path)
 
     return output_path
@@ -141,7 +142,6 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                     none_count_text = gr.Textbox(label = 'none count', interactive = False, max_lines = 1)
                     work_count_text = gr.Textbox(label = 'work count', interactive = False, max_lines = 1)
                     toal_count_text = gr.Textbox(label = 'total count', interactive = False, max_lines = 1)
-
     with gr.Tab(label = '일괄 변경'):
         with gr.Row():
             with gr.Column(scale = 10):
@@ -164,11 +164,9 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                     download_file = gr.File()
             with gr.Column(scale = 2):
                 with gr.Row():
-                    download_user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong", "test"], label = "user")
+                    download_user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong"],value = ["hyunjooo", "jin", "jeonga", "mijeong"], label = "user")
                     download_button = gr.Button("Download", variant="primary")
                 
-
-
     all_date_search_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     date_search_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
     anno_change_button.click(change_db_anno, inputs = [change_index_text_list, change_cate_text_list, anno_checkbox, change_user_list], outputs = [progress_text])
