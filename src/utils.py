@@ -38,3 +38,12 @@ def get_image_data(user_name, index, start = False):
     db.close()
 
     return retrieved_data_dict
+
+def get_db(user_list):
+    data_list = []
+    for user in user_list:
+        db = get_db_connection(user)
+        for key in db.keys():
+            data_bytes = db.get(key)
+            data_list.append(pickle.loads(data_bytes))
+    return data_list
