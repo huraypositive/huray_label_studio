@@ -1,23 +1,16 @@
+import datetime
 import gradio as gr
+import os
 import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 from gradio_calendar import Calendar
-from utils import get_db_connection
+from utils import get_db_connection, get_db
 
 font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
 font_prop = font_manager.FontProperties(fname=font_path)
 rc('font', family=font_prop.get_name())
-
-def get_db(user_list):
-    data_list = []
-    for user in user_list:
-        db = get_db_connection(user)
-        for key in db.keys():
-            data_bytes = db.get(key)
-            data_list.append(pickle.loads(data_bytes))
-    return data_list
 
 def analysis_all_date(user_list):
     df = pd.DataFrame(get_db(user_list))
@@ -55,6 +48,7 @@ def analysis_each_date(user_list, date_time):
 
 def analysis_cate_data(user_list, class_name):
     df = pd.DataFrame(get_db(user_list))
+
     df['annotation'] = df['annotation'].apply(lambda x: 'Empty' if x == None else x)
     filtered_df = df[df['class_name'].isin(class_name)]
     annotations = filtered_df['annotation'].tolist()
@@ -66,7 +60,7 @@ def analysis_cate_data(user_list, class_name):
         sum_count = sum(count_df.values)
         fig, ax = plt.subplots()
         ax.pie(annotation_counts.values(), labels=annotation_counts.keys(), autopct='%1.1f%%', startangle=90, wedgeprops=dict(width=0.3))
-        ax.set_title(f'Annotations for class "{" ".join(class_name)}"')
+        ax.set_title(f'Annotations for class "{class_name}"')
         return fig, f"{count_df.get('True', '0')} ({count_df.get('True', 0) / sum_count*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / sum_count*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / sum_count*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / sum_count*100:.2f}%)", sum_count, int(sum_count) - int(count_df.get('Empty', 0))
     else:
         gr.Warning('클래스명을 확인해주세요.')
@@ -110,6 +104,17 @@ def change_db_anno(change_index_text_list, change_cate_text_list, anno_checkbox,
         raise gr.Error('변경된 데이터가 없습니다. 음식명을 확인해주세요.')
     return '음식명 일괄변경이 완료되었습니다.'
     
+def make_csv(user_list):
+    csv_dir_path = '/data/huray_label_studio_data/export_csv'
+    anno_date = datetime.date.today()
+    output_path = os.path.join(csv_dir_path, f'{anno_date.strftime("%Y-%m-%d")}.csv')
+    df = pd.DataFrame(get_db(user_list))
+    filtered_df = df[df['annotation'].notnull()]
+    count_df = filtered_df.groupby(['class_name', 'annotation']).size().unstack(fill_value=0)
+    count_df.to_csv(output_path)
+
+    return output_path
+
 with gr.Blocks(theme = gr.themes.Soft()) as demo:
     gr.Markdown("""# Huray Label Admin""")
     with gr.Tab(label = '통계데이터'):
@@ -152,9 +157,20 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                 with gr.Row():
                     anno_checkbox = gr.CheckboxGroup(["True", "False", "unknown"], label = "anno")
                     anno_change_button = gr.Button('일괄 변경', variant="primary")
+    with gr.Tab(label = '통계데이터 다운로드'):
+        with gr.Row():
+            with gr.Column(scale = 10):
+                with gr.Row():
+                    download_file = gr.File()
+            with gr.Column(scale = 2):
+                with gr.Row():
+                    download_user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong", "test"], label = "user")
+                    download_button = gr.Button("Download", variant="primary")
+                
+
 
     all_date_search_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     date_search_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
-    class_search_button.click(analysis_cate_data, inputs = [user_list, class_text], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     anno_change_button.click(change_db_anno, inputs = [change_index_text_list, change_cate_text_list, anno_checkbox, change_user_list], outputs = [progress_text])
+    download_button.click(make_csv, inputs = [download_user_list],  outputs = [download_file])
 demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0", server_port = 7861)
