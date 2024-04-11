@@ -2,7 +2,7 @@ import gradio as gr
 import pickle
 from PIL import Image as PILIMAGE
 from PIL import ImageOps
-import datetime
+from datetime import datetime
 
 from utils import get_db_connection, get_index_db_conncection, get_last_index, get_image_data
 
@@ -26,13 +26,16 @@ def filtering_worked_item(user_dropdown, index, retrieved_data_dict, increase = 
     return index, retrieved_data_dict
     
 def put_anno_data_to_db(user_name, index, anno, item_length):
+    now = datetime.now()
     db = get_db_connection(user_name)
     index_db = get_index_db_conncection()
     retrieved_data_dict = get_image_data(user_name, index)
-    anno_date = datetime.date.today()
+    date = now.strftime('%Y-%m-%d')
+    time = now.strftime('%H:%M:%S')
     retrieved_data_dict['annotation'] = anno
-    retrieved_data_dict['datetime'] = anno_date.strftime("%Y-%m-%d")
+    retrieved_data_dict['datetime'] = date
     retrieved_data_dict['index'] = index
+    retrieved_data_dict['anno_time'] = time
     dict_bytes = pickle.dumps(retrieved_data_dict)
     db[str(index).encode()] = dict_bytes
     db.sync()
