@@ -33,6 +33,7 @@ def analysis_each_date(user_list, date_time):
     date = date_time.strftime("%Y-%m-%d")
     df = pd.DataFrame(get_db(user_list))
     filtered_df = df[df['datetime'] == date]
+    filtered_df = filtered_df[filtered_df['pre_anno'].isna()]
     filtered_df.loc[:, 'annotation'] = filtered_df['annotation'].apply(lambda x: 'Empty' if x == None else x)
     count_df = filtered_df[filtered_df['annotation'].notnull()]['annotation'].value_counts()
     
@@ -244,11 +245,11 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
     with gr.Tab(label = '시각화 일괄 변경'):
         with gr.Row():
             with gr.Column(scale = 10):
-                with gr.Row():
+                with gr.Row(scale = 10):
                     img_gallery = gr.Gallery(allow_preview=False, columns = 10, show_label=False)
-                with gr.Row():
+                with gr.Row(scale = 1):
                     img_index_text = gr.Textbox(label = '선택 이미지')
-                with gr.Row():
+                with gr.Row(scale = 1):
                     img_progress_text = gr.Textbox(label = '선택 이미지')
             with gr.Column(scale = 2):
                 with gr.Row():
