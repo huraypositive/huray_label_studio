@@ -191,7 +191,30 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                 with gr.Row():
                     download_user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong"],value = ["hyunjooo", "jin", "jeonga", "mijeong"], label = "user")
                     download_button = gr.Button("Download", variant="primary")
-                
+    with gr.Tab(label = '시각화 일괄 변경'):
+        with gr.Row():
+            with gr.Column(scale = 10):
+                with gr.Row():
+                    img_gallery = gr.Gallery(allow_preview=False, columns = 10, show_label=False)
+                with gr.Row():
+                    img_index_text = gr.Textbox(label = '선택 이미지')
+                with gr.Row():
+                    img_progress_text = gr.Textbox(label = '선택 이미지')
+            with gr.Column(scale = 2):
+                with gr.Row():
+                    img_change_user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong"], label = "user")
+                with gr.Row():
+                    class_text_name = gr.Textbox(label = 'class', max_lines = 1)
+                with gr.Row():
+                    get_image_button = gr.Button('이미지가져오기', variant="primary")
+                with gr.Row():
+                    delete_index_text = gr.Textbox(label = '삭제 index 번호', max_lines = 1)
+                with gr.Row():
+                    delete_index_button = gr.Button('index 지우기', variant="primary")
+                with gr.Row():
+                    img_anno_checkbox = gr.CheckboxGroup(["True", "False", "unknown"], label = "anno")
+                    img_anno_change_button = gr.Button('일괄 변경', variant="primary")
+                                    
     all_date_search_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     date_search_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
     time_analysis_button.click(analysis_time_data, inputs = [user_list, date_time], outputs = [time_plot_output])
