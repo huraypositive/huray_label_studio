@@ -178,6 +178,7 @@ def gallery_img_anno_change(img_change_user_list, img_index_text, img_index_dict
         retrieved_data_dict = pickle.loads(data_bytes)
         retrieved_data_dict['annotation'] = img_anno_checkbox[0]
         retrieved_data_dict['datetime'] = date
+        retrieved_data_dict['pre_anno'] = True
         dict_bytes = pickle.dumps(retrieved_data_dict)
         db[str(img_index_dict[int(img_index)]).encode()] = dict_bytes 
         class_text = retrieved_data_dict['class_name']
@@ -274,6 +275,6 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
     delete_index_button.click(del_index, inputs = [delete_index_text, img_index_text], outputs = [img_index_text])
     img_anno_change_button.click(gallery_img_anno_change, inputs = [img_change_user_list, img_index_text, img_index_dict, img_anno_checkbox], outputs = [img_progress_text])
 
-with open("../data/auth.json", "r") as f:
+with open("/home/ai04/workspace/huray_label_studio/data/auth.json", "r") as f:
     auth_dict = json.load(f)
 demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0", server_port = 7861, auth=(auth_dict["id"], auth_dict["pw"]))
