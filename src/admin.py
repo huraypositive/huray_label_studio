@@ -5,6 +5,7 @@ import os
 import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
+from datetime import datetime
 from matplotlib.ticker import MaxNLocator
 from matplotlib import font_manager, rc
 from gradio_calendar import Calendar
@@ -137,8 +138,56 @@ def make_csv(user_list):
 
     return output_path
 
+def get_select_index(img_index_text, evt: gr.SelectData):
+    img_index_list = img_index_text.split(',')
+    print(img_index_list)
+    if str(evt.index) not in img_index_list:
+        return f'{img_index_text}{str(evt.index)},'
+    img_index_list.remove(str(evt.index))
+
+    return ",".join(img_index_list)
+
+def del_index(delete_index_text, img_index_text):
+    delete_index_list = delete_index_text.split(',')
+    img_index_list = img_index_text.split(',')
+    for delete_index in delete_index_list:
+        img_index_list.remove(str(delete_index))
+
+    return ",".join(img_index_list)
+
+def get_image(img_change_user_list, class_text_name):
+    index_dict = {}
+    df = pd.DataFrame(get_db(img_change_user_list))
+    filtered_df = df[df['class_name'] == class_text_name]
+    reset_index_df = filtered_df.reset_index(drop=True)
+    for i in range(len(reset_index_df)):
+        index_dict[i] = reset_index_df.loc[i,'index']
+    return reset_index_df['file_path'].to_list(), index_dict
+
+def gallery_img_anno_change(img_change_user_list, img_index_text, img_index_dict, img_anno_checkbox):
+    if len(img_anno_checkbox) > 1:
+        raise gr.Error('하나의 annotation만 선택해주세요.')
+    now = datetime.now()
+    db = get_db_connection(img_change_user_list[0])
+    img_index_list = img_index_text.split(',')
+    date = now.strftime('%Y-%m-%d')
+    if "" in img_index_list:
+        img_index_list.remove("")
+    for img_index in img_index_list:
+        data_bytes = db[str(img_index_dict[int(img_index)]).encode()]
+        retrieved_data_dict = pickle.loads(data_bytes)
+        retrieved_data_dict['annotation'] = img_anno_checkbox[0]
+        retrieved_data_dict['datetime'] = date
+        dict_bytes = pickle.dumps(retrieved_data_dict)
+        db[str(img_index_dict[int(img_index)]).encode()] = dict_bytes 
+        class_text = retrieved_data_dict['class_name']
+    db.close()
+
+    return f"{img_change_user_list[0]}의 {class_text}가 {len(img_index_list)}개 {img_anno_checkbox[0]}로 변경이 완료되었습니다."
+
 with gr.Blocks(theme = gr.themes.Soft()) as demo:
     gr.Markdown("""# Huray Label Admin""")
+    img_index_dict = gr.State()
     with gr.Tab(label = '통계데이터'):
         with gr.Row():
             with gr.Column(scale = 10):
@@ -214,12 +263,16 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                 with gr.Row():
                     img_anno_checkbox = gr.CheckboxGroup(["True", "False", "unknown"], label = "anno")
                     img_anno_change_button = gr.Button('일괄 변경', variant="primary")
-                                    
+
     all_date_search_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     date_search_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
     time_analysis_button.click(analysis_time_data, inputs = [user_list, date_time], outputs = [time_plot_output])
     anno_change_button.click(change_db_anno, inputs = [change_index_text_list, change_cate_text_list, anno_checkbox, change_user_list], outputs = [progress_text])
     download_button.click(make_csv, inputs = [download_user_list],  outputs = [download_file])
+    get_image_button.click(get_image, inputs = [img_change_user_list, class_text_name], outputs = [img_gallery, img_index_dict])
+    img_gallery.select(get_select_index, inputs = [img_index_text], outputs = [img_index_text])
+    delete_index_button.click(del_index, inputs = [delete_index_text, img_index_text], outputs = [img_index_text])
+    img_anno_change_button.click(gallery_img_anno_change, inputs = [img_change_user_list, img_index_text, img_index_dict, img_anno_checkbox], outputs = [img_progress_text])
 
 with open("../data/auth.json", "r") as f:
     auth_dict = json.load(f)
