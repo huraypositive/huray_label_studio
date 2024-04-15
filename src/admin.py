@@ -1,5 +1,6 @@
 import datetime
 import gradio as gr
+import json
 import os
 import pandas as pd
 import pickle
@@ -196,4 +197,7 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
     time_analysis_button.click(analysis_time_data, inputs = [user_list, date_time], outputs = [time_plot_output])
     anno_change_button.click(change_db_anno, inputs = [change_index_text_list, change_cate_text_list, anno_checkbox, change_user_list], outputs = [progress_text])
     download_button.click(make_csv, inputs = [download_user_list],  outputs = [download_file])
-demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0", server_port = 7861)
+
+with open("../data/auth.json", "r") as f:
+    auth_dict = json.load(f)
+demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0", server_port = 7861, auth=(auth_dict["id"], auth_dict["pw"]))
