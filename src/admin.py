@@ -66,10 +66,12 @@ def analysis_cate_data(user_list, class_name):
     else:
         gr.Warning('클래스명을 확인해주세요.')
 
-def analysis_time_data(user_list):
+def analysis_time_data(user_list, date_time):
+    date = date_time.strftime("%Y-%m-%d")
     df = pd.DataFrame(get_db(user_list))
-    df['hour'] = pd.to_datetime(df['anno_time'], format='%H:%M:%S').dt.hour
-    hourly_counts = df.groupby('hour').size()
+    filtered_df = df[df['datetime'] == date]
+    filtered_df['hour'] = pd.to_datetime(filtered_df['anno_time'], format='%H:%M:%S').dt.hour
+    hourly_counts = filtered_df.groupby('hour').size()
     plt.figure(figsize=(10, 6))
     bars = plt.bar(hourly_counts.index, hourly_counts.values)
     for bar in bars:
@@ -191,7 +193,7 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                 
     all_date_search_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
     date_search_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
-    time_analysis_button.click(analysis_time_data, inputs = [user_list], outputs = [time_plot_output])
+    time_analysis_button.click(analysis_time_data, inputs = [user_list, date_time], outputs = [time_plot_output])
     anno_change_button.click(change_db_anno, inputs = [change_index_text_list, change_cate_text_list, anno_checkbox, change_user_list], outputs = [progress_text])
     download_button.click(make_csv, inputs = [download_user_list],  outputs = [download_file])
 demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0", server_port = 7861)
