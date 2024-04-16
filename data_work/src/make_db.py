@@ -20,8 +20,7 @@ def make_db(db_path, json_path):
     index = 0
     for key in tqdm(json_data.keys()):
         for file_path in json_data[key]:
-            new_path = file_path.replace("/data3/", "/data/") #if use in v100 del this line
-            db_dict = {"file_path": new_path, "class_name": key, "annotation": None, "datetime": None}
+            db_dict = {"file_path": file_path, "class_name": key, "annotation": None, "datetime": None, "index": index, "pre_anno": None}
             dict_bytes = pickle.dumps(db_dict)
             db[str(index).encode()] = dict_bytes
             index += 1
