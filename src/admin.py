@@ -29,11 +29,12 @@ def analysis_all_date(user_list):
 
     return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total, int(total) - int(count_df.get('Empty', 0))
 
-def analysis_each_date(user_list, date_time):
+def analysis_each_date(user_list, date_time, all_anno_check):
     date = date_time.strftime("%Y-%m-%d")
     df = pd.DataFrame(get_db(user_list))
     filtered_df = df[df['datetime'] == date]
-    filtered_df = filtered_df[filtered_df['pre_anno'].isna()]
+    if all_anno_check:
+        filtered_df = filtered_df[filtered_df['pre_anno'].isna()]
     filtered_df.loc[:, 'annotation'] = filtered_df['annotation'].apply(lambda x: 'Empty' if x == None else x)
     count_df = filtered_df[filtered_df['annotation'].notnull()]['annotation'].value_counts()
     
@@ -73,7 +74,7 @@ def analysis_time_data(user_list, date_time):
     date = date_time.strftime("%Y-%m-%d")
     df = pd.DataFrame(get_db(user_list))
     filtered_df = df[df['datetime'] == date]
-    filtered_df['hour'] = pd.to_datetime(filtered_df['anno_time'], format='%H:%M:%S').dt.hour
+    filtered_df.loc[:, 'hour'] = pd.to_datetime(filtered_df['anno_time'], format='%H:%M:%S').dt.hour
     hourly_counts = filtered_df.groupby('hour').size()
     plt.figure(figsize=(10, 6))
     bars = plt.bar(hourly_counts.index, hourly_counts.values)
@@ -131,7 +132,9 @@ def make_csv(user_list):
     if len(user_list) == 0:
         raise gr.Error("유저를 선택해주세요.")
     csv_dir_path = '/data/huray_label_studio_data/export_csv'
-    output_path = os.path.join(csv_dir_path, f'{datetime.date.today()}.csv')
+    now = datetime.now()
+    date = now.strftime('%Y-%m-%d')
+    output_path = os.path.join(csv_dir_path, f'{date}.csv')
     df = pd.DataFrame(get_db(user_list))
     df['annotation'] = df['annotation'].fillna("None")
     count_df = df.groupby(['class_name', 'annotation']).size().unstack(fill_value=0)
@@ -141,7 +144,6 @@ def make_csv(user_list):
 
 def get_select_index(img_index_text, evt: gr.SelectData):
     img_index_list = img_index_text.split(',')
-    print(img_index_list)
     if str(evt.index) not in img_index_list:
         return f'{img_index_text}{str(evt.index)},'
     img_index_list.remove(str(evt.index))
@@ -185,7 +187,7 @@ def gallery_img_anno_change(img_change_user_list, img_index_text, img_index_dict
         class_text = retrieved_data_dict['class_name']
     db.close()
 
-    return f"{img_change_user_list[0]}의 {class_text}가 {len(img_index_list)}개 {img_anno_checkbox[0]}로 변경이 완료되었습니다."
+    return f"{img_change_user_list[0]}의 {class_text}가 {len(img_index_list)}개 {img_anno_checkbox[0]}로 변경이 완료되었습니다.", ""
 
 with gr.Blocks(theme = gr.themes.Soft()) as demo:
     gr.Markdown("""# Huray Label Admin""")
@@ -203,6 +205,7 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                 with gr.Row():
                     date_time = Calendar(type="datetime", label="calendar", info = "날짜를 선택하세요")
                 with gr.Row():
+                    all_anno_check = gr.Checkbox(label="일괄작업라벨보지않기", value = True)
                     date_search_button = gr.Button('날짜별 조회')
                     all_date_search_button = gr.Button('전체 날짜 조회', variant="primary")
                 with gr.Row():
@@ -245,12 +248,12 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
     with gr.Tab(label = '시각화 일괄 변경'):
         with gr.Row():
             with gr.Column(scale = 10):
-                with gr.Row(scale = 10):
+                with gr.Row():
                     img_gallery = gr.Gallery(allow_preview=False, columns = 10, show_label=False)
-                with gr.Row(scale = 1):
+                with gr.Row():
                     img_index_text = gr.Textbox(label = '선택 이미지')
-                with gr.Row(scale = 1):
-                    img_progress_text = gr.Textbox(label = '선택 이미지')
+                with gr.Row():
+                    img_progress_text = gr.Textbox(label = 'progress')
             with gr.Column(scale = 2):
                 with gr.Row():
                     img_change_user_list = gr.CheckboxGroup(["hyunjooo", "jin", "jeonga", "mijeong"], label = "user")
@@ -267,14 +270,14 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
                     img_anno_change_button = gr.Button('일괄 변경', variant="primary")
 
     all_date_search_button.click(analysis_all_date, inputs = [user_list], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text])
-    date_search_button.click(analysis_each_date, inputs = [user_list, date_time], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
+    date_search_button.click(analysis_each_date, inputs = [user_list, date_time, all_anno_check], outputs = [plot_output, true_count_text, false_count_text, unknown_count_text, none_count_text,toal_count_text,work_count_text, class_text])
     time_analysis_button.click(analysis_time_data, inputs = [user_list, date_time], outputs = [time_plot_output])
     anno_change_button.click(change_db_anno, inputs = [change_index_text_list, change_cate_text_list, anno_checkbox, change_user_list], outputs = [progress_text])
     download_button.click(make_csv, inputs = [download_user_list],  outputs = [download_file])
     get_image_button.click(get_image, inputs = [img_change_user_list, class_text_name], outputs = [img_gallery, img_index_dict])
     img_gallery.select(get_select_index, inputs = [img_index_text], outputs = [img_index_text])
     delete_index_button.click(del_index, inputs = [delete_index_text, img_index_text], outputs = [img_index_text])
-    img_anno_change_button.click(gallery_img_anno_change, inputs = [img_change_user_list, img_index_text, img_index_dict, img_anno_checkbox], outputs = [img_progress_text])
+    img_anno_change_button.click(gallery_img_anno_change, inputs = [img_change_user_list, img_index_text, img_index_dict, img_anno_checkbox], outputs = [img_progress_text, img_index_text])
 
 with open("/home/ai04/workspace/huray_label_studio/data/auth.json", "r") as f:
     auth_dict = json.load(f)
