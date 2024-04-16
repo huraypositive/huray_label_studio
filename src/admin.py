@@ -26,7 +26,7 @@ def analysis_all_date(user_list):
     ax.pie(count_df, startangle=140, wedgeprops=dict(width=0.3))
     ax.legend(legend_labels, title="Annotations", loc="best")
     ax.set_title(f'{" ".join(user_list)} Annotation Distribution')
-
+    plt.close()
     return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total, int(total) - int(count_df.get('Empty', 0))
 
 def analysis_each_date(user_list, date_time, all_anno_check):
@@ -48,7 +48,7 @@ def analysis_each_date(user_list, date_time, all_anno_check):
     class_list = list(set(filtered_df['class_name'].to_list()))
     if total == 0:
         raise gr.Error("해당일자의 데이터가 존재하지 않습니다.")
-
+    plt.close()
     return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total, int(total) - int(count_df.get('Empty', 0)), class_list
 
 def analysis_cate_data(user_list, class_name):
@@ -66,6 +66,7 @@ def analysis_cate_data(user_list, class_name):
         fig, ax = plt.subplots()
         ax.pie(annotation_counts.values(), labels=annotation_counts.keys(), autopct='%1.1f%%', startangle=90, wedgeprops=dict(width=0.3))
         ax.set_title(f'Annotations for class "{class_name}"')
+        plt.close()
         return fig, f"{count_df.get('True', '0')} ({count_df.get('True', 0) / sum_count*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / sum_count*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / sum_count*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / sum_count*100:.2f}%)", sum_count, int(sum_count) - int(count_df.get('Empty', 0))
     else:
         gr.Warning('클래스명을 확인해주세요.')
@@ -76,7 +77,7 @@ def analysis_time_data(user_list, date_time):
     filtered_df = df[df['datetime'] == date].copy()
     filtered_df.loc[:, 'hour'] = pd.to_datetime(filtered_df['anno_time'], format='%H:%M:%S').dt.hour
     hourly_counts = filtered_df.groupby('hour').size()
-    plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(10, 6))
     bars = plt.bar(hourly_counts.index, hourly_counts.values)
     for bar in bars:
         yval = bar.get_height()
@@ -86,8 +87,8 @@ def analysis_time_data(user_list, date_time):
     plt.ylabel('라벨링 수')
     plt.xticks(rotation=45)
     plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-
-    return plt
+    plt.close()
+    return fig
 
 def change_db_anno(change_index_text_list, change_cate_text_list, anno_checkbox, user_list):
     if len(anno_checkbox) == 0:
@@ -187,7 +188,7 @@ def gallery_img_anno_change(img_change_user_list, img_index_text, img_index_dict
         class_text = retrieved_data_dict['class_name']
     db.close()
 
-    return f"{img_change_user_list[0]}의 {class_text}가 {len(img_index_list)}개 {img_anno_checkbox[0]}로 변경이 완료되었습니다.", ""
+    return f"{img_change_user_list[0]}의 {class_text} {len(img_index_list)}개 {img_anno_checkbox[0]}로 변경이 완료되었습니다.", ""
 
 with gr.Blocks(theme = gr.themes.Soft()) as demo:
     gr.Markdown("""# Huray Label Admin""")
@@ -281,4 +282,4 @@ with gr.Blocks(theme = gr.themes.Soft()) as demo:
 
 with open("/home/ai04/workspace/huray_label_studio/data/auth.json", "r") as f:
     auth_dict = json.load(f)
-demo.launch(ssl_verify=False, share=True, server_name="0.0.0.0", server_port = 7861, auth=(auth_dict["id"], auth_dict["pw"]))
+demo.launch(share=False, server_name="0.0.0.0", server_port = 7861, auth=(auth_dict["id"], auth_dict["pw"]))
