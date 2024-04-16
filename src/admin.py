@@ -73,7 +73,7 @@ def analysis_cate_data(user_list, class_name):
 def analysis_time_data(user_list, date_time):
     date = date_time.strftime("%Y-%m-%d")
     df = pd.DataFrame(get_db(user_list))
-    filtered_df = df[df['datetime'] == date]
+    filtered_df = df[df['datetime'] == date].copy()
     filtered_df.loc[:, 'hour'] = pd.to_datetime(filtered_df['anno_time'], format='%H:%M:%S').dt.hour
     hourly_counts = filtered_df.groupby('hour').size()
     plt.figure(figsize=(10, 6))
