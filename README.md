@@ -16,12 +16,13 @@
     
 4. $gradio app.py
 
-```json
+
 app.py : main page for annotating data    
 make_db.py: init db for first work    
 admin.py: analysis user task statistics.
 
-
+DB format
+```json
 "file_path" : image file path(str)
 "class_name": image file crawl food name (str)
 "annotation": annotations (str) -> True/False/unknown
