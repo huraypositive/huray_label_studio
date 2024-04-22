@@ -21,6 +21,15 @@ app.py : main page for annotating data
 make_db.py: init db for first work    
 admin.py: analysis user task statistics.
 
+DB format
+```json
+"file_path" : image file path(str)
+"class_name": image file crawl food name (str)
+"annotation": annotations (str) -> True/False/unknown
+"datetime": Recorded date(datetime)
+"index": unique index number (int)
+"pre_anno": with or without pre-annotation(bool)
+```
 
 
 guide docs: https://docs.google.com/presentation/d/1I-AIdn1O6rjtsY6pKV4JC05hN6CWwS8tJXWzXh6S3IY/edit#slide=id.p
