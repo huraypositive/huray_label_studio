@@ -1,9 +1,10 @@
 import argparse
-import os
 import json
+from multiprocessing import Pool, cpu_count
+import os
+
 from PIL import Image
 import imagehash
-from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
 
 def get_largest_image(images:list):

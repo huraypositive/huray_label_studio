@@ -1,9 +1,14 @@
 import argparse
-import bsddb3.db as bdb
 import json
-import pickle
-from tqdm import tqdm
 import os
+import pickle
+
+from tqdm import tqdm
+
+import bsddb3.db as bdb
+
+
+
 def make_db(db_path, json_path):
     """
     make berkley DB for annotations tools using image json

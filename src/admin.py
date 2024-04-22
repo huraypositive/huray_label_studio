@@ -1,15 +1,17 @@
 import datetime
-import gradio as gr
 import json
 import os
-import pandas as pd
 import pickle
+
+import gradio as gr
 import matplotlib.pyplot as plt
-from datetime import datetime
-from matplotlib.ticker import MaxNLocator
+import pandas as pd
 from matplotlib import font_manager, rc
+from matplotlib.ticker import MaxNLocator
+
 from gradio_calendar import Calendar
 from utils import get_db_connection, get_db
+
 
 font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
 font_prop = font_manager.FontProperties(fname=font_path)

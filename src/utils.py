@@ -1,6 +1,7 @@
-import bsddb3.db as bdb
 import os
 import pickle
+
+import bsddb3.db as bdb
 
 DBPATH = '/data/huray_label_studio_data'
 

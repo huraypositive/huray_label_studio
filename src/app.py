@@ -1,10 +1,12 @@
-import gradio as gr
+from datetime import datetime
 import pickle
+
+import gradio as gr
 from PIL import Image as PILIMAGE
 from PIL import ImageOps
-from datetime import datetime
 
 from utils import get_db_connection, get_index_db_conncection, get_last_index, get_image_data
+
 
 
 def index_changer(index, increase = True):

@@ -1,9 +1,11 @@
 import argparse
 import os
+
 import pandas as pd
 from PIL import Image
-from ultralytics import YOLO
 from tqdm import tqdm
+
+from ultralytics import YOLO
 
 def get_model(model_path, model_config):
     """
