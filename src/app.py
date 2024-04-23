@@ -7,15 +7,35 @@ from PIL import ImageOps
 
 from utils import get_db_connection, get_index_db_conncection, get_last_index, get_image_data
 
-
-
 def index_changer(index, increase = True):
+    """
+    Change(increase/decrease/target) index, filter user input mistakes (if string input in)
+
+    Args:
+    - index: current index
+    - increase: boolean data if true index will increase 
+
+    Returns:
+    - int: changed index
+    """
     filtered_index = ''.join([char for char in str(index) if char.isdigit()])
     if increase:
         return int(filtered_index) + 1
     return int(filtered_index) -1
 
 def filtering_worked_item(user_dropdown, index, retrieved_data_dict, increase = True):
+    """
+    Filters out data items that have no annotations and updates the index accordingly
+    
+    Args:
+    - user_dropdown: User-selected option
+    - index: Current data index
+    - retrieved_data_dict: Dictionary containing data items
+    - increase: Boolean flag to determine whether to increment or decrement the index (default is True)
+
+    Returns:
+    - tuple: Updated index and data dictionary
+    """
     anno_text = retrieved_data_dict.get('annotation', '')
     while anno_text:
         index = index_changer(index, increase = increase)
@@ -28,6 +48,18 @@ def filtering_worked_item(user_dropdown, index, retrieved_data_dict, increase = 
     return index, retrieved_data_dict
     
 def put_anno_data_to_db(user_name, index, anno, item_length):
+    """
+    Stores annotation data into the database
+
+    Args:
+    - user_name: Username of the annotator
+    - index: Index of the current data
+    - anno: Annotation text
+    - item_length: Total number of items
+
+    Returns:
+    - int: Updated data index
+    """
     now = datetime.now()
     db = get_db_connection(user_name)
     index_db = get_index_db_conncection()
@@ -54,6 +86,15 @@ def put_anno_data_to_db(user_name, index, anno, item_length):
     return index
 
 def display_image(image_path):
+    """
+    Loads an image from a given path, resizes and pads it, then returns the modified image
+
+    Args:
+    - image_path: Path to the image file
+
+    Returns:
+    - PIL.Image: The processed image object
+    """
     CFGSIZE = 500
     img = PILIMAGE.open(image_path)
     resized_image = ImageOps.contain(img, (CFGSIZE,CFGSIZE))
@@ -64,6 +105,16 @@ def display_image(image_path):
     return padded_image
 
 def start_func(user_dropdown, work_check):
+    """
+    Initializes data based on user selection and sets up the initial view
+
+    Args:
+    - user_dropdown: User-selected option
+    - work_check: Boolean flag indicating whether to start with initial data or resume
+
+    Returns:
+    - tuple: The display image, class name, annotation text, index, and item length minus one
+    """
     if not user_dropdown:
         raise gr.Error("사용자를 선택해 주세요!")
     if work_check:
@@ -80,6 +131,20 @@ def start_func(user_dropdown, work_check):
     return display_image(image_file_path), class_name, anno_text, index, int(item_length) - 1
 
 def anno_func(user_dropdown, anno, index, work_check, item_length, prev_class_text):
+    """
+    Processes annotations and updates the database accordingly, also manages data display
+
+    Args:
+    - user_dropdown: User-selected option
+    - anno: Annotation text to be saved
+    - index: Current index of data
+    - work_check: Boolean flag to check if additional filtering is needed
+    - item_length: Total number of items
+    - prev_class_text: Previous class text to check for any changes in class
+
+    Returns:
+    - tuple: Processed display image, current class name, current annotation text, and updated index
+    """
     filtered_index = ''.join([char for char in index if char.isdigit()])
     if not user_dropdown:
         raise gr.Error("사용자를 선택해 주세요.")
@@ -96,6 +161,19 @@ def anno_func(user_dropdown, anno, index, work_check, item_length, prev_class_te
     return display_image(image_file_path), class_name, anno_text, index
 
 def move_func(user_dropdown, status, index, work_check, item_length):
+    """
+    Navigates through data entries based on user commands and updates the display accordingly
+
+    Args:
+    - user_dropdown: User-selected option
+    - status: Navigation command ('prev', 'next', or 'move')
+    - index: Current index of data
+    - work_check: Boolean flag to check if additional filtering is needed
+    - item_length: Total number of items
+
+    Returns:
+    - tuple: Processed display image, current class name, current annotation text, and updated index
+    """
     start_index = index
     if not user_dropdown:
         raise gr.Error("사용자를 선택해 주세요.")

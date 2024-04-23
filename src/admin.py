@@ -18,6 +18,15 @@ font_prop = font_manager.FontProperties(fname=font_path)
 rc('font', family=font_prop.get_name())
 
 def analysis_all_date(user_list):
+    """
+    Analyzes all data for a list of users, calculating annotation distributions
+
+    Args:
+    - user_list: List of usernames whose data to analyze
+
+    Returns:
+    - Multiple: Pie chart figure, counts and percentages of each annotation category
+    """
     df = pd.DataFrame(get_db(user_list))
     df['annotation'] = df['annotation'].apply(lambda x: 'Empty' if x == None else x)
     count_df = df[df['annotation'].notnull()]['annotation'].value_counts()
@@ -32,6 +41,17 @@ def analysis_all_date(user_list):
     return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total, int(total) - int(count_df.get('Empty', 0))
 
 def analysis_each_date(user_list, date_time, all_anno_check):
+    """
+    Analyzes data for a specific date, filtering by users and possibly incomplete annotations
+
+    Args:
+    - user_list: List of usernames
+    - date_time: Specific date for data retrieval
+    - all_anno_check: Flag to include only data with missing pre-annotations
+
+    Returns:
+    - Multiple: Pie chart figure, counts and percentages of each annotation category, and a list of classes found
+    """
     date = date_time.strftime("%Y-%m-%d")
     df = pd.DataFrame(get_db(user_list))
     filtered_df = df[df['datetime'] == date]
@@ -54,6 +74,16 @@ def analysis_each_date(user_list, date_time, all_anno_check):
     return fig, f"{count_df.get('True', 0)} ({count_df.get('True', 0) / total*100:.2f}%)", f"{count_df.get('False', 0)} ({count_df.get('False', 0) / total*100:.2f}%)", f"{count_df.get('unknown', 0)} ({count_df.get('unknown', 0) / total*100:.2f}%)", f"{count_df.get('Empty', 0)} ({count_df.get('Empty', 0) / total*100:.2f}%)", total, int(total) - int(count_df.get('Empty', 0)), class_list
 
 def analysis_cate_data(user_list, class_name):
+    """
+    Analyzes data for specific classes across multiple users
+
+    Args:
+    - user_list: List of usernames
+    - class_name: Class name to filter the data
+
+    Returns:
+    - Multiple: Pie chart figure, counts and percentages of each annotation category
+    """
     df = pd.DataFrame(get_db(user_list))
 
     df['annotation'] = df['annotation'].apply(lambda x: 'Empty' if x == None else x)
@@ -74,6 +104,16 @@ def analysis_cate_data(user_list, class_name):
         gr.Warning('클래스명을 확인해주세요.')
 
 def analysis_time_data(user_list, date_time):
+    """
+    Generates a histogram of annotation activities over time for a given day
+
+    Args:
+    - user_list: List of usernames
+    - date_time: Specific date for the data
+
+    Returns:
+    - fig: A matplotlib figure displaying the hourly distribution of annotations
+    """
     date = date_time.strftime("%Y-%m-%d")
     df = pd.DataFrame(get_db(user_list))
     filtered_df = df[df['datetime'] == date].copy()
@@ -93,6 +133,21 @@ def analysis_time_data(user_list, date_time):
     return fig
 
 def change_db_anno(change_index_text_list, change_cate_text_list, anno_checkbox, user_list):
+    """
+    Modifies annotations in the database either by specific indices or by category within a set of user databases
+
+    Args:
+    - change_index_text_list: Comma-separated list of indices for which to change the annotation
+    - change_cate_text_list: Comma-separated list of category names for which to change the annotation
+    - anno_checkbox: List containing the selected annotation to apply
+    - user_list: List of usernames whose databases will be modified
+
+    Raises:
+    - gr.Error: Various error messages depending on whether the input conditions are met
+
+    Returns:
+    - str: Message confirming the completion of the updates
+    """
     if len(anno_checkbox) == 0:
         raise gr.Error("annotation을 선택해주세요.")
     if len(anno_checkbox) > 1:
@@ -132,6 +187,18 @@ def change_db_anno(change_index_text_list, change_cate_text_list, anno_checkbox,
     return '음식명 일괄변경이 완료되었습니다.'
   
 def make_csv(user_list):
+    """
+    Generates a CSV file containing aggregated annotation data for selected users
+
+    Args:
+    - user_list: List of usernames whose data will be exported
+
+    Raises:
+    - gr.Error: If no users are selected
+
+    Returns:
+    - str: The path to the generated CSV file
+    """
     if len(user_list) == 0:
         raise gr.Error("유저를 선택해주세요.")
     csv_dir_path = '/data/huray_label_studio_data/export_csv'
@@ -146,6 +213,16 @@ def make_csv(user_list):
     return output_path
 
 def get_select_index(img_index_text, evt: gr.SelectData):
+    """
+    Adjusts the index list based on user interaction with images
+
+    Args:
+    - img_index_text: Comma-separated string of image indices
+    - evt: Event data including the index of the selected or deselected image
+
+    Returns:
+    - str: Updated comma-separated string of image indices
+    """
     img_index_list = img_index_text.split(',')
     if str(evt.index) not in img_index_list:
         return f'{img_index_text}{str(evt.index)},'
@@ -154,6 +231,16 @@ def get_select_index(img_index_text, evt: gr.SelectData):
     return ",".join(img_index_list)
 
 def del_index(delete_index_text, img_index_text):
+    """
+    Removes specified indices from a list of image indices
+
+    Args:
+    - delete_index_text: Comma-separated string of indices to be removed
+    - img_index_text: Comma-separated string of image indices
+
+    Returns:
+    - str: Updated comma-separated string of image indices
+    """
     delete_index_list = delete_index_text.split(',')
     img_index_list = img_index_text.split(',')
     for delete_index in delete_index_list:
@@ -162,6 +249,16 @@ def del_index(delete_index_text, img_index_text):
     return ",".join(img_index_list)
 
 def get_image(img_change_user_list, class_text_name):
+    """
+    Retrieves image paths and their indices for a specific class from user databases
+
+    Args:
+    - img_change_user_list: List of usernames
+    - class_text_name: Specific class name to filter the images
+
+    Returns:
+    - tuple: List of image file paths and a dictionary of index mappings
+    """
     index_dict = {}
     df = pd.DataFrame(get_db(img_change_user_list))
     filtered_df = df[df['class_name'] == class_text_name]
@@ -171,6 +268,21 @@ def get_image(img_change_user_list, class_text_name):
     return reset_index_df['file_path'].to_list(), index_dict
 
 def gallery_img_anno_change(img_change_user_list, img_index_text, img_index_dict, img_anno_checkbox):
+    """
+    Updates annotations for selected images in a gallery based on user inputs
+
+    Args:
+    - img_change_user_list: List containing the username of the user whose database is to be modified
+    - img_index_text: Comma-separated string of image indices to update
+    - img_index_dict: Dictionary mapping indices to actual database indices
+    - img_anno_checkbox: List containing the new annotation to apply
+
+    Raises:
+    - gr.Error: If more than one annotation is selected
+
+    Returns:
+    - tuple: Confirmation message and an empty string
+    """
     if len(img_anno_checkbox) > 1:
         raise gr.Error('하나의 annotation만 선택해주세요.')
     now = datetime.now()
