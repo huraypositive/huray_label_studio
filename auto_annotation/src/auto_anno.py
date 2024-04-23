@@ -17,12 +17,30 @@ import bsddb3.db as bdb
 DBPATH = '/data/huray_label_studio_data/'
 
 def get_db(user_name):
+    """
+    Establishes a database connection for a given user
+
+    Args:
+    - user_name: The username for which to open the database
+
+    Returns:
+    - bdb.DB: The opened database connection
+    """
     db = bdb.DB()
     db.open(os.path.join(DBPATH, f'{user_name}.db'), None, bdb.DB_HASH)
 
     return db
 
 def get_df(db):
+    """
+    Converts database content into a pandas DataFrame
+
+    Args:
+    - db: The database connection from which data is to be fetched
+
+    Returns:
+    - pd.DataFrame: DataFrame containing all records from the database
+    """
     data_list = []
     for key in db.keys():
         data_bytes = db.get(key)
@@ -31,6 +49,16 @@ def get_df(db):
     return pd.DataFrame(data_list)
 
 def preprocess(image, device):
+    """
+    Preprocesses an image for model input
+
+    Args:
+    - image: The image to preprocess
+    - device: The computation device to use (e.g., 'cuda', 'cpu')
+
+    Returns:
+    - torch.Tensor: The preprocessed image tensor
+    """
     preprocess = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -40,7 +68,18 @@ def preprocess(image, device):
     return preprocess(image).unsqueeze(0).to(device)
 
 def get_feature_df(class_name, db, model, device):
-    
+    """
+    Computes feature similarity of images within the same class and sorts them
+
+    Args:
+    - class_name: The class of images to process
+    - db: Database connection
+    - model: The neural network model to use for feature extraction
+    - device: The computation device (e.g., 'cuda', 'cpu')
+
+    Returns:
+    - pd.DataFrame: DataFrame of images sorted by similarity to a base image
+    """
     df = get_df(db)
     class_df = df[df['class_name'] == class_name]
     try:
@@ -62,6 +101,15 @@ def get_feature_df(class_name, db, model, device):
     return df_sorted
 
 def update_db(db, img_index, date, anno):
+    """
+    Updates a specific record in the database
+
+    Args:
+    - db: The database connection
+    - img_index: The index of the image in the database to update
+    - date: The current date to record when the annotation was updated
+    - anno: The new annotation value
+    """
     data_bytes = db[str(img_index).encode()]
     retrieved_data_dict = pickle.loads(data_bytes)
     retrieved_data_dict['annotation'] = anno
@@ -71,6 +119,13 @@ def update_db(db, img_index, date, anno):
     db[str(img_index).encode()] = dict_bytes
 
 def change_db_false(df, db):
+    """
+    Marks the least similar images as 'False' based on their similarity scores
+
+    Args:
+    - df: DataFrame containing images and their similarity scores
+    - db: Database connection for updates
+    """
     bottom_df = df.nsmallest(150, 'similarity')
     bottom_index = bottom_df['index'].values
     now = datetime.now()
@@ -79,6 +134,13 @@ def change_db_false(df, db):
         update_db(db, img_index, date, 'False')
          
 def change_db_true(df, db):
+    """
+    Marks the most similar images as 'True' based on their similarity scores
+
+    Args:
+    - df: DataFrame containing images and their similarity scores
+    - db: Database connection for updates
+    """
     upper_df = df.nlargest(30, 'similarity')
     upper_index = upper_df['index'].values
     now = datetime.now()
@@ -86,7 +148,6 @@ def change_db_true(df, db):
     for img_index in upper_index.tolist():
         update_db(db, img_index, date, 'True')
 
-    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--class_name_path', type = str)
@@ -110,11 +171,3 @@ if __name__ == '__main__':
         df_sorted = get_feature_df(class_name, db, model, device)
         change_db_true(df_sorted, db)
     db.close()
-
-
-    
-    
-
-
-
-    
