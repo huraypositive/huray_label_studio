@@ -164,6 +164,7 @@ def change_db_anno(change_index_text_list, change_cate_text_list, anno_checkbox,
             data_bytes = db[str(change_index).encode()]
             retrieved_data_dict = pickle.loads(data_bytes)
             retrieved_data_dict['annotation'] = anno_checkbox[0]
+            retrieved_data_dict['pre_anno'] = True
             dict_bytes = pickle.dumps(retrieved_data_dict)
             db[str(change_index).encode()] = dict_bytes
             db.close()
@@ -178,6 +179,7 @@ def change_db_anno(change_index_text_list, change_cate_text_list, anno_checkbox,
             retrieved_data_dict = pickle.loads(data_bytes)
             if retrieved_data_dict['class_name'] in change_cate_text_set:
                 retrieved_data_dict['annotation'] = anno_checkbox[0]
+                retrieved_data_dict['pre_anno'] = True
                 dict_bytes = pickle.dumps(retrieved_data_dict)
                 db[str(index).encode()] = dict_bytes
                 change_count += 1
