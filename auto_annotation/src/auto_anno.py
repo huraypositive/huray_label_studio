@@ -118,45 +118,41 @@ def update_db(db, img_index, date, anno):
     dict_bytes = pickle.dumps(retrieved_data_dict)
     db[str(img_index).encode()] = dict_bytes
 
-def change_db_false(df, db):
+def change_db(df, db, annotation, ranking_count):
     """
-    Marks the least similar images as 'False' based on their similarity scores
+    Updates the database to mark images based on their similarity scores.
+    Images with the highest scores are marked if the annotation is 'True',
+    and those with the lowest scores are marked otherwise.
 
     Args:
-    - df: DataFrame containing images and their similarity scores
-    - db: Database connection for updates
+    - df (DataFrame): DataFrame containing images and their similarity scores.
+    - db: Database connection object used for updates.
+    - annotation (str): A string value 'True' or 'False' determining which images to mark based on their scores.
+    - ranking_count (int): Number of images to be marked based on their ranking in similarity.
     """
-    bottom_df = df.nsmallest(150, 'similarity')
-    bottom_index = bottom_df['index'].values
+    if annotation == 'True':
+        filtered_df = df.nlargest(ranking_count, 'similarity')
+    else:    
+        filtered_df = df.nsmallest(ranking_count, 'similarity')
+    filtered_index = filtered_df['index'].values
     now = datetime.now()
     date = now.strftime('%Y-%m-%d')
-    for img_index in bottom_index.tolist():
-        update_db(db, img_index, date, 'False')
-         
-def change_db_true(df, db):
-    """
-    Marks the most similar images as 'True' based on their similarity scores
-
-    Args:
-    - df: DataFrame containing images and their similarity scores
-    - db: Database connection for updates
-    """
-    upper_df = df.nlargest(30, 'similarity')
-    upper_index = upper_df['index'].values
-    now = datetime.now()
-    date = now.strftime('%Y-%m-%d')
-    for img_index in upper_index.tolist():
-        update_db(db, img_index, date, 'True')
+    for img_index in filtered_index.tolist():
+        update_db(db, img_index, date, annotation)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--class_name_path', type = str)
     parser.add_argument('--model_name', type = str)
     parser.add_argument('--user_name', type = str)
+    parser.add_argument('--annotation', choices=["True", "False"])
+    parser.add_argument('--ranking_count', type = int)
     args = parser.parse_args()
     txt_path  = args.class_name_path
     user_name = args.user_name
     model_name = args.model_name
+    annotation = args.annotation
+    ranking_count = args.ranking_count
 
     with open(txt_path, 'r') as f:
         class_list = [line.strip() for line in f]
@@ -169,5 +165,5 @@ if __name__ == '__main__':
     
     for class_name in tqdm(class_list):
         df_sorted = get_feature_df(class_name, db, model, device)
-        change_db_true(df_sorted, db)
+        change_db(df_sorted, db, annotation, ranking_count)
     db.close()
