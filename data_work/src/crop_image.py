@@ -88,7 +88,7 @@ def get_crop(model_path:str, model_config:dict, analysis_output_path:str, err_ou
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_path', type = str, default = '/home/ai04/workspace/food_detection/food_detection_v1/yolov8l_120_0005_auto/weights/best.pt', required = True)
+    parser.add_argument('--model_path', type = str, default = '/data3/food_labelingDB/best.pt', required = True)
     parser.add_argument('--image_dir', type = str, default = '/data3/crawl_data', required = True)
     parser.add_argument('--output_dir', type = str, default = '/data3/crop_data_test', required = True)
     parser.add_argument('--analysis_output_path', type = str, required = True)
