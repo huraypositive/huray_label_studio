@@ -31,5 +31,19 @@ DB format
 "pre_anno": with or without pre-annotation(bool)
 ```
 
-
 guide docs: https://docs.google.com/presentation/d/1I-AIdn1O6rjtsY6pKV4JC05hN6CWwS8tJXWzXh6S3IY/edit#slide=id.p
+
+[jupyter lab]
+1. location : (sever: v100, user:ai04)
+              /home/ai04/.jupyter/jupyter_notebook_config.py
+   
+3. set config
+   - c.ServerApp.allow_origin = '*'
+   - c.ServerApp.notebook_dir = '~/workspace/jupyter/visualize_db'  # for 'ai04'
+   - c.ServerApp.ip = '192.168.200.105'
+   - c.ServerApp.open_browser = False
+   - c.ServerApp.port = 8888
+     
+4. activation
+   - nohub jupyter lab &
+    
