@@ -3,7 +3,7 @@ import pickle
 
 import bsddb3.db as bdb
 
-DBPATH = '/data/proc_db'
+DBPATH = '/data3/proc_db'
 
 def get_db_connection(user_name):
     """

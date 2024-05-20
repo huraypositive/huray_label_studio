@@ -17,6 +17,14 @@ font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
 font_prop = font_manager.FontProperties(fname=font_path)
 rc('font', family=font_prop.get_name())
 
+
+selected_users = ["hyunjooo", "jin", "jeonga", "mijeong", "test"]
+# 각 사용자별로 별도의 데이터 리스트를 갖는 딕셔너리를 생성
+user_data_lists = {user: [] for user in selected_users}
+user_db = {user: get_db_connection(user) for user in selected_users}
+
+
+
 def analysis_all_date(user_list):
     """
     Analyzes all data for a list of users, calculating annotation distributions
@@ -315,13 +323,26 @@ def get_image(img_change_user_list, class_text_name, selected_radio,multi_option
     Returns:
     - tuple: List of image file paths and a dictionary of index mappings
     """
+    if len(class_text_name) == 0:
+        raise gr.Error("클래스명을 입력해주세요.")
+    
     index_dict = {}
-    df = pd.DataFrame(get_db(img_change_user_list))
+    data_list = []
+    for user in img_change_user_list:
+        data_list.extend(user_data_lists.get(user, []))
+    
+    df = pd.DataFrame(data_list)
     if selected_radio != 'ALL':
         filted_anno_df = df[df['annotation'] == selected_radio]
-        filtered_df = filted_anno_df[filted_anno_df['class_name'] == class_text_name]
+        if class_text_name: 
+            filtered_df = filted_anno_df[filted_anno_df['class_name'] == class_text_name]
+        else:
+            filtered_df = filted_anno_df
     else:
-        filtered_df = df[df['class_name'] == class_text_name]
+        if class_text_name: 
+            filtered_df = df[df['class_name'] == class_text_name]
+        else:
+            filtered_df = df
         
     reset_index_df = filtered_df.reset_index(drop=True)
     for i in range(len(reset_index_df)):
@@ -368,6 +389,23 @@ def gallery_img_anno_change(img_change_user_list, img_index_text, img_index_dict
 
 def checkbox_select(img_index_text):
     return ''
+
+def db_init():
+    # 각 사용자별 데이터 리스트를 채움
+    for user in selected_users:
+        # 임시 리스트에 db에서 각 사용자별 데이터 저장
+        
+        # 데이터베이스 연결 초기화
+        db = get_db_connection(user)
+        temp_data_list = []
+        for idx in range(len(db.keys())):
+            data_bytes = db.get(str(idx).encode())
+            if data_bytes is not None:
+                temp_data_list.append(pickle.loads(data_bytes))
+        # 완성된 임시 리스트를 사용자별 데이터 리스트 딕셔너리에 할당
+        user_data_lists[user] = temp_data_list
+
+   
 
 ## Javascript for shortcuts
 js = """
@@ -571,6 +609,8 @@ with gr.Blocks(head=js ,css=css, js= func_js, theme = gr.themes.Soft()) as demo:
     #img_anno_change_button.click(gallery_img_anno_change, inputs = [img_change_user_list, img_index_text, img_index_dict, img_anno_checkbox], outputs = [img_progress_text, img_index_text])
     multi_option_check.change(checkbox_select, img_index_text, img_index_text)
 
-with open("/home/ai04/workspace/huray_label_studio/data/auth.json", "r") as f:
+
+db_init()
+with open("/home/ai04/workspace/jshan/label_tools/huray_label_studio/data/auth.json", "r") as f:
     auth_dict = json.load(f)
-demo.launch(share=False, server_name="0.0.0.0",  server_port=7862, auth=(auth_dict["id"], auth_dict["pw"]))
+demo.launch(share=False, server_name="0.0.0.0",  server_port=7864, auth=(auth_dict["id"], auth_dict["pw"]))
