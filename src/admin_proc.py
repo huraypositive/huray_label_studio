@@ -154,7 +154,7 @@ def change_img_db_anno(img_index_text, change_anno_radio, img_change_user_list, 
             retrieved_data_dict['pre_anno'] = True
             dict_bytes = pickle.dumps(retrieved_data_dict)
             db[str(change_index).encode()] = dict_bytes
-            db.close()
+        db.close()
         return class_text_name + ' 클래스의 인덱스 일괄변경이 완료되었습니다.'
     else:
         return '변경할 값을 확인하세요.'
